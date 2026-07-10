@@ -1,0 +1,20 @@
+{
+  "name": "preexam-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "dev:solo": "wrangler dev --remote --port 8788",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260521.0",
+    "typescript": "^5.6.3",
+    "wrangler": "^4.93.0"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "stripe": "^22.2.2"
+  }
+}

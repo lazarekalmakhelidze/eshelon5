@@ -1,0 +1,6 @@
+INSERT INTO arcade_games (id, title, description, thumbnail_url, game_url, mode) VALUES
+('dino-run', 'ไดโนเสาร์วิ่งข้ามกระบองเพชร', 'เกมวิ่งหลบกระบองเพชรสุดคลาสสิก ทดสอบปฏิกิริยาตอบสนองของคุณ', 'https://lottie.host/8cdb80ab-c37f-4b05-95df-3a8549de2b08/D9eIq0A8P3.json', '/games/dino-run/index.html', 'solo'),
+('whack-a-mole', 'ทุบตัวตุ่น (Whack-a-Mole)', 'ทดสอบความไวของสายตาและมือ ทุบตัวตุ่นให้ได้มากที่สุดใน 30 วินาที', 'https://lottie.host/80e9a659-cb14-4161-9c6a-493ed2a967c7/dM210iB6oM.json', '/games/whack-a-mole/index.html', 'solo'),
+('space-invaders', 'ยานอวกาศยิงเอเลี่ยน', 'ปกป้องโลกจากการบุกรุกของเอเลี่ยน! เกมยิงสุดมันส์แนวเรโทร', 'https://lottie.host/8468ef4d-b65d-4f01-aeeb-0539828e83b4/r1t9U11wA3.json', '/games/space-invaders/index.html', 'solo'),
+('catch-apple', 'รับผลไม้ (Catch Apple)', 'เลื่อนตะกร้าไปซ้ายขวาเพื่อรับแอปเปิลที่ตกลงมา ห้ามพลาดเกิน 3 ลูก!', 'https://lottie.host/e2d45c85-2e6b-4e8c-8fbd-3e4bcf559e31/rD87B4qX4l.json', '/games/catch-apple/index.html', 'solo'),
+('typing-speed', 'พิมพ์ดีดพิชิตคำ (Typing Speed)', 'ฝึกพิมพ์ดีดภาษาอังกฤษให้ไวที่สุด ท้าทายความเร็วในการพิมพ์ของคุณ', 'https://lottie.host/8c1591cc-df23-448e-ba67-3e5f49ef43c3/p7t4C9xK2A.json', '/games/typing-speed/index.html', 'solo');

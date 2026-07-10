@@ -1,0 +1,66 @@
+const fs = require('fs');
+const { execSync } = require('child_process');
+
+const questions = [
+    {
+        id: '424',
+        text: '<p>3 &nbsp;&nbsp;&nbsp; 15 &nbsp;&nbsp;&nbsp; 5 &nbsp;&nbsp;&nbsp; 35 &nbsp;&nbsp;&nbsp; 7 &nbsp;&nbsp;&nbsp; 63 &nbsp;&nbsp;&nbsp; 9 &nbsp;&nbsp;&nbsp; 99 &nbsp;&nbsp;&nbsp; 11 &nbsp;&nbsp;&nbsp; .....</p>',
+        choices: JSON.stringify({ A: '119', B: '126', C: '135', D: '143' }),
+        correct: 'D',
+        explanation: '<p><strong>ตอบ 4) 143</strong></p><p>เป็นอนุกรม 2 ชุดสลับกัน<br/>ชุดที่ 1 (ตำแหน่งคี่): 3, 5, 7, 9, 11<br/>ชุดที่ 2 (ตำแหน่งคู่): 15, 35, 63, 99, <strong>143</strong><br/>ระยะห่างชุดที่ 2: +20, +28, +36, <strong>+44</strong> (เพิ่มทีละ 8)</p>',
+        catalogs: '["อนุกรม"]'
+    },
+    {
+        id: '425',
+        text: '<p>9 &nbsp;&nbsp;&nbsp; 18 &nbsp;&nbsp;&nbsp; 6 &nbsp;&nbsp;&nbsp; 24 &nbsp;&nbsp;&nbsp; 3 &nbsp;&nbsp;&nbsp; .....</p>',
+        choices: JSON.stringify({ A: '9', B: '18', C: '24', D: '30' }),
+        correct: 'D',
+        explanation: '<p><strong>ตอบ 4) 30</strong></p><p>เป็นอนุกรม 2 ชุดสลับกัน<br/>ชุดที่ 1 (ตำแหน่งคี่): 9, 6, 3 (ลดทีละ 3)<br/>ชุดที่ 2 (ตำแหน่งคู่): 18, 24, <strong>30</strong> (เพิ่มทีละ 6)</p>',
+        catalogs: '["อนุกรม"]'
+    },
+    {
+        id: '426',
+        text: '<p>2 &nbsp;&nbsp;&nbsp; 5 &nbsp;&nbsp;&nbsp; 12 &nbsp;&nbsp;&nbsp; 28 &nbsp;&nbsp;&nbsp; 58 &nbsp;&nbsp;&nbsp; 107 &nbsp;&nbsp;&nbsp; .....</p>',
+        choices: JSON.stringify({ A: '156', B: '169', C: '180', D: '195' }),
+        correct: 'C',
+        explanation: '<p><strong>ตอบ 3) 180</strong></p><p>ระยะห่างเพิ่มขึ้นหลายชั้น<br/>ชั้นที่ 1: +3, +7, +16, +30, +49, <strong>+73</strong><br/>ชั้นที่ 2: +4, +9, +14, +19, <strong>+24</strong><br/>ชั้นที่ 3: +5, +5, +5, <strong>+5</strong><br/>ชั้นที่ 3 เพิ่มทีละ 5 คงที่ จึงได้ชั้นที่สองเป็น 19+5=24 และชั้นแรกเป็น 49+24=73<br/>ดังนั้นคำตอบคือ 107 + 73 = <strong>180</strong></p>',
+        catalogs: '["อนุกรม"]'
+    },
+    {
+        id: '427',
+        text: '<p>ซื้อผ้าเช็ดหน้า 3 ผืน กางเกง 4 ตัว ราคา 2,300 บาท ถ้าซื้อผ้า 5 ผืน กางเกง 16 ตัว ราคา 8,500 บาท อยากทราบว่ากางเกง 1 ตัว แพงกว่าผ้าเช็ดหน้า 1 ผืนกี่บาท</p>',
+        choices: JSON.stringify({ A: '100 บาท', B: '200 บาท', C: '400 บาท', D: '500 บาท' }),
+        correct: 'C',
+        explanation: '<p><strong>ตอบ 3) 400 บาท</strong></p><p>กำหนดให้ ผ้าเช็ดหน้าเป็น x และกางเกงเป็น y<br/>3x + 4y = 2,300 &nbsp;&nbsp; ---- (1)<br/>5x + 16y = 8,500 &nbsp;&nbsp; ---- (2)<br/>หาค่า x, y จาก (1) × 4 ;<br/>12x + 16y = 9,200 &nbsp;&nbsp; ---- (3)<br/>นำ (3) - (2) ;<br/>(12x + 16y) - (5x + 16y) = 9,200 - 8,500<br/>7x = 700<br/>x = 100<br/>แทน x ในสมการ (1) ;<br/>3(100) + 4y = 2,300<br/>4y = 2,000<br/>y = 500<br/>ผลต่างของ x และ y คือ 500 - 100 = 400<br/>ดังนั้น กางเกงแพงกว่าผ้าเช็ดหน้า <strong>400</strong> บาท</p>',
+        catalogs: '["คณิตศาสตร์ทั่วไป"]'
+    },
+    {
+        id: '428',
+        text: '<p>นายไก่ผสมสีทาไม้ โดยผสมสีกับทินเนอร์ในอัตราส่วน 1:1.5 ถ้านายไก่ต้องการผสมสีทาไม้ 10 ลิตร อยากทราบว่าต้องใช้ทินเนอร์กี่ลิตร</p>',
+        choices: JSON.stringify({ A: '4 ลิตร', B: '5 ลิตร', C: '6 ลิตร', D: '7 ลิตร' }),
+        correct: 'C',
+        explanation: '<p><strong>ตอบ 3) 6 ลิตร</strong></p><p>อัตราส่วน สี : ทินเนอร์ = 1 : 1.5<br/>รวมส่วนผสมทั้งหมด = 1 + 1.5 = 2.5 ส่วน<br/>เทียบบัญญัติไตรยางศ์:<br/>สีทาไม้ 2.5 ลิตร ใช้ทินเนอร์ 1.5 ลิตร<br/>ต้องการสีทาไม้ 10 ลิตร ใช้ทินเนอร์ = (10 × 1.5) / 2.5 = <strong>6 ลิตร</strong></p>',
+        catalogs: '["คณิตศาสตร์ทั่วไป"]'
+    },
+    {
+        id: '429',
+        text: '<p>ฝันขับรถใช้ความเร็ว 95 ไมล์ต่อชั่วโมง เป็นเวลา 3 ชั่วโมง และเพิ่มความเร็วเป็น 115 ไมล์ต่อชั่วโมง เป็นเวลา 2 ชั่วโมง จงหาว่าฝันขับรถด้วยความเร็วเฉลี่ยเท่าไร</p>',
+        choices: JSON.stringify({ A: '100 ไมล์ต่อชั่วโมง', B: '103 ไมล์ต่อชั่วโมง', C: '107 ไมล์ต่อชั่วโมง', D: '109 ไมล์ต่อชั่วโมง' }),
+        correct: 'B',
+        explanation: '<p><strong>ตอบ 2) 103 ไมล์ต่อชั่วโมง</strong></p><p>สูตร ความเร็วเฉลี่ย = ระยะทางทั้งหมด / เวลาทั้งหมด<br/>ระยะทางช่วงแรก = 95 × 3 = 285 ไมล์<br/>ระยะทางช่วงหลัง = 115 × 2 = 230 ไมล์<br/>ระยะทางรวม = 285 + 230 = 515 ไมล์<br/>เวลารวม = 3 + 2 = 5 ชั่วโมง<br/>ความเร็วเฉลี่ย = 515 / 5 = <strong>103 ไมล์ต่อชั่วโมง</strong></p>',
+        catalogs: '["คณิตศาสตร์ทั่วไป"]'
+    }
+];
+
+let sql = '';
+for (const q of questions) {
+    const textEscaped = q.text.replace(/'/g, "''");
+    const choicesEscaped = q.choices.replace(/'/g, "''");
+    const explEscaped = q.explanation.replace(/'/g, "''");
+    sql += `INSERT INTO questions (id, question_text, choices, correct_answer, explanation, category, subject, difficulty, is_custom, created_at, updated_at, catalogs, exam_year) VALUES ('${q.id}', '${textEscaped}', '${choicesEscaped}', '${q.correct}', '${explEscaped}', 'ก.พ.', 'ความรู้ความสามารถทั่วไป', 50, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '${q.catalogs}', '2559');\n`;
+}
+
+fs.writeFileSync('insert_new_q_4.sql', sql, 'utf-8');
+console.log('Running SQL insertion for part 4...');
+execSync('npx wrangler d1 execute preexam --remote --file=insert_new_q_4.sql', { stdio: 'inherit' });
+console.log('Inserted questions part 4.');

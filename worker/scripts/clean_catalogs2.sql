@@ -1,0 +1,15 @@
+UPDATE questions SET catalogs = replace(catalogs, '"ภาษาอังกฤษ",', '');
+UPDATE questions SET catalogs = replace(catalogs, '"ภาษาอังกฤษ", ', '');
+UPDATE questions SET catalogs = replace(catalogs, ',"ภาษาอังกฤษ"', '');
+UPDATE questions SET catalogs = replace(catalogs, ' , "ภาษาอังกฤษ"', '');
+UPDATE questions SET catalogs = replace(catalogs, '"กฎหมาย",', '');
+UPDATE questions SET catalogs = replace(catalogs, '"กฎหมาย", ', '');
+UPDATE questions SET catalogs = replace(catalogs, ',"กฎหมาย"', '');
+UPDATE questions SET catalogs = replace(catalogs, '"ความสามารถในการวิเคราะห์",', '');
+UPDATE questions SET catalogs = replace(catalogs, '"ความสามารถในการวิเคราะห์", ', '');
+UPDATE questions SET catalogs = replace(catalogs, ',"ความสามารถในการวิเคราะห์"', '');
+UPDATE questions SET catalogs = replace(catalogs, '[ ', '[');
+UPDATE questions SET catalogs = replace(catalogs, ' ]', ']');
+UPDATE questions SET catalogs = '[]' WHERE catalogs = '["ภาษาอังกฤษ"]';
+UPDATE questions SET catalogs = '[]' WHERE catalogs = '["กฎหมาย"]';
+UPDATE questions SET catalogs = '[]' WHERE catalogs = '["ความสามารถในการวิเคราะห์"]';

@@ -1,0 +1,58 @@
+const fs = require('fs');
+const { execSync } = require('child_process');
+
+const questions = [
+    {
+        id: '436',
+        text: '<p>นาย A เดินทางระยะ 12 กิโลเมตร โดยใช้ความเร็ว 9 กิโลเมตรต่อชั่วโมง หลังจากนั้นเดินทางด้วยความเร็ว 5 กิโลเมตรต่อชั่วโมง เป็นระยะทาง 10 กิโลเมตร และ 16 กิโลเมตรสุดท้าย ใช้ความเร็ว 6 กิโลเมตรต่อชั่วโมง จงหาความเร็วเฉลี่ยในการเดินทาง</p>',
+        choices: JSON.stringify({ A: '6 กิโลเมตรต่อชั่วโมง', B: '6 1/2 กิโลเมตรต่อชั่วโมง', C: '6 1/3 กิโลเมตรต่อชั่วโมง', D: '7 1/2 กิโลเมตรต่อชั่วโมง' }),
+        correct: 'C',
+        explanation: '<p><strong>ตอบ 3) 6 1/3 กิโลเมตรต่อชั่วโมง</strong></p><p>จากสูตร v = s / t<br/>หา t1 = 12 / 9 = 4/3 ชั่วโมง<br/>หา t2 = 10 / 5 = 2 ชั่วโมง<br/>หา t3 = 16 / 6 = 8/3 ชั่วโมง<br/>ความเร็วเฉลี่ย (v) = ระยะทางรวม / เวลารวม<br/>v = (12 + 10 + 16) / (4/3 + 2 + 8/3)<br/>v = 38 / (12/3 + 6/3)<br/>v = 38 / (18/3) = 38 / 6 = 19/3 = <strong>6 1/3</strong> กิโลเมตรต่อชั่วโมง</p>',
+        catalogs: '["เลขทั่วไป"]'
+    },
+    {
+        id: '437',
+        text: '<p>3 * 5 = 11<br/>6 * 2 = 14<br/>4 * 7 = ?</p>',
+        choices: JSON.stringify({ A: '10', B: '13', C: '15', D: '17' }),
+        correct: 'C',
+        explanation: '<p><strong>ตอบ 3) 15</strong></p><p>จากความสัมพันธ์ <strong>(หน้า × 2) + หลัง = ผลลัพธ์</strong><br/>จะได้<br/>(3 × 2) + 5 = 6 + 5 = 11<br/>(6 × 2) + 2 = 12 + 2 = 14<br/>ดังนั้น (4 × 2) + 7 = 8 + 7 = <strong>15</strong></p>',
+        catalogs: '["เลขทั่วไป"]'
+    },
+    {
+        id: '438',
+        text: '<p>2 * 4 = 3<br/>6 * 4 = 5<br/>2 * 2 = ?</p>',
+        choices: JSON.stringify({ A: '8', B: '6', C: '4', D: '2' }),
+        correct: 'D',
+        explanation: '<p><strong>ตอบ 4) 2</strong></p><p>จากความสัมพันธ์ <strong>(หน้า + หลัง) / 2 = ผลลัพธ์</strong><br/>จะได้<br/>(2 + 4) / 2 = 6 / 2 = 3<br/>(6 + 4) / 2 = 10 / 2 = 5<br/>ดังนั้น (2 + 2) / 2 = 4 / 2 = <strong>2</strong></p>',
+        catalogs: '["เลขทั่วไป"]'
+    },
+    {
+        id: '439',
+        text: '<p>1 * 2 = 4<br/>3 * 4 = 16<br/>5 * 6 = ?</p>',
+        choices: JSON.stringify({ A: '30', B: '31', C: '36', D: '41' }),
+        correct: 'C',
+        explanation: '<p><strong>ตอบ 3) 36</strong></p><p>จากความสัมพันธ์ <strong>(หน้า × หลัง) + หลัง = ผลลัพธ์</strong><br/>จะได้<br/>(1 × 2) + 2 = 2 + 2 = 4<br/>(3 × 4) + 4 = 12 + 4 = 16<br/>ดังนั้น (5 × 6) + 6 = 30 + 6 = <strong>36</strong></p>',
+        catalogs: '["เลขทั่วไป"]'
+    },
+    {
+        id: '440',
+        text: '<p>2 * 3 = 13<br/>8 * 5 = 89<br/>12 * 5 = ?</p>',
+        choices: JSON.stringify({ A: '60', B: '149', C: '169', D: '196' }),
+        correct: 'C',
+        explanation: '<p><strong>ตอบ 3) 169</strong></p><p>จากความสัมพันธ์ <strong>(หน้า)² + (หลัง)² = ผลลัพธ์</strong><br/>จะได้<br/>(2²) + (3²) = 4 + 9 = 13<br/>(8²) + (5²) = 64 + 25 = 89<br/>ดังนั้น (12²) + (5²) = 144 + 25 = <strong>169</strong></p>',
+        catalogs: '["เลขทั่วไป"]'
+    }
+];
+
+let sql = '';
+for (const q of questions) {
+    const textEscaped = q.text.replace(/'/g, "''");
+    const choicesEscaped = q.choices.replace(/'/g, "''");
+    const explEscaped = q.explanation.replace(/'/g, "''");
+    sql += `INSERT INTO questions (id, question_text, choices, correct_answer, explanation, category, subject, difficulty, is_custom, created_at, updated_at, catalogs, exam_year) VALUES ('${q.id}', '${textEscaped}', '${choicesEscaped}', '${q.correct}', '${explEscaped}', 'ก.พ.', 'ความรู้ความสามารถทั่วไป', 50, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '${q.catalogs}', '2559');\n`;
+}
+
+fs.writeFileSync('insert_new_q_6.sql', sql, 'utf-8');
+console.log('Running SQL insertion for part 6...');
+execSync('npx wrangler d1 execute preexam --remote --file=insert_new_q_6.sql', { stdio: 'inherit' });
+console.log('Inserted questions part 6.');
