@@ -1,0 +1,21 @@
+name = "preexam-api"
+main = "src/index.ts"
+compatibility_date = "2026-05-21"
+
+workers_dev = true
+
+routes = [
+  { pattern = "preexam.online/api/*", zone_name = "preexam.online" }
+]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "preexam"
+database_id = "313bea1c-6bfa-492e-8faa-690d471ecb9d"
+
+[durable_objects]
+bindings = [{ name = "REALTIME", class_name = "RealtimeDO" }]
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["RealtimeDO"]
