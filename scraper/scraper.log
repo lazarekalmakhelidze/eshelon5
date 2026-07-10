@@ -1,0 +1,250 @@
+2026-03-03 11:27:18,142 - INFO - Starting scrape at https://job.ocsc.go.th/portal
+2026-03-03 11:27:23,488 - INFO - Found 9 agencies
+2026-03-03 11:27:42,570 - INFO - OCSC Scraper finished. Processed 0 new jobs.
+2026-03-03 11:30:12,486 - INFO - Starting scrape at https://job.ocsc.go.th/portal
+2026-03-03 11:30:13,806 - INFO - Found 9 agencies
+2026-03-03 11:30:14,030 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10289
+2026-03-03 11:30:14,284 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10319
+2026-03-03 11:30:14,618 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10320
+2026-03-03 11:30:14,618 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10322
+2026-03-03 11:30:14,957 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10324
+2026-03-03 11:30:14,958 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10325
+2026-03-03 11:30:14,958 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10327
+2026-03-03 11:30:14,959 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10289
+2026-03-03 11:30:15,311 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10309
+2026-03-03 11:30:15,312 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10355
+2026-03-03 11:30:15,313 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10356
+2026-03-03 11:30:15,313 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10357
+2026-03-03 11:30:15,314 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10308
+2026-03-03 11:30:15,803 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10350
+2026-03-03 11:30:15,804 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10351
+2026-03-03 11:30:15,805 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10352
+2026-03-03 11:30:15,805 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10353
+2026-03-03 11:30:15,806 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10354
+2026-03-03 11:30:15,806 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10314
+2026-03-03 11:30:15,807 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10349
+2026-03-03 11:30:15,808 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10313
+2026-03-03 11:30:15,808 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10305
+2026-03-03 11:30:15,809 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10301
+2026-03-03 11:30:16,297 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10363
+2026-03-03 11:30:16,298 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10364
+2026-03-03 11:30:16,298 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10365
+2026-03-03 11:30:16,299 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10366
+2026-03-03 11:30:16,300 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10367
+2026-03-03 11:30:16,300 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10368
+2026-03-03 11:30:16,301 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10369
+2026-03-03 11:30:16,301 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10371
+2026-03-03 11:30:16,661 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10370
+2026-03-03 11:30:16,662 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10372
+2026-03-03 11:30:17,072 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10375
+2026-03-03 11:30:17,073 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10374
+2026-03-03 11:30:17,074 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10358
+2026-03-03 11:30:17,074 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10360
+2026-03-03 11:30:17,075 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10359
+2026-03-03 11:30:17,076 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10321
+2026-03-03 11:30:17,076 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10373
+2026-03-03 11:30:17,077 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10376
+2026-03-03 11:30:17,077 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10306
+2026-03-03 11:30:17,078 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10307
+2026-03-03 11:30:17,079 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10303
+2026-03-03 11:30:17,079 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10302
+2026-03-03 11:30:17,079 - INFO - OCSC Scraper finished. Processed 0 new jobs.
+2026-03-03 11:30:18,081 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/alert "HTTP/1.1 401 Unauthorized"
+2026-03-03 11:30:18,082 - ERROR - Failed to post alert: Client error '401 Unauthorized' for url 'http://localhost:3000/api/scraper/alert'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401
+2026-03-03 11:34:09,185 - INFO - Starting scrape at https://job.ocsc.go.th/portal
+2026-03-03 11:34:10,623 - INFO - Found 9 agencies
+2026-03-03 11:34:10,860 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10319
+2026-03-03 11:34:11,183 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10289
+2026-03-03 11:34:11,640 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10363
+2026-03-03 11:34:11,640 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10364
+2026-03-03 11:34:11,641 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10365
+2026-03-03 11:34:11,641 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10366
+2026-03-03 11:34:11,642 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10367
+2026-03-03 11:34:11,642 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10368
+2026-03-03 11:34:11,642 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10369
+2026-03-03 11:34:11,643 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10371
+2026-03-03 11:34:12,021 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10375
+2026-03-03 11:34:12,021 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10374
+2026-03-03 11:34:12,022 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10358
+2026-03-03 11:34:12,022 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10360
+2026-03-03 11:34:12,022 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10359
+2026-03-03 11:34:12,023 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10321
+2026-03-03 11:34:12,023 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10373
+2026-03-03 11:34:12,024 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10376
+2026-03-03 11:34:12,024 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10306
+2026-03-03 11:34:12,024 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10307
+2026-03-03 11:34:12,025 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10303
+2026-03-03 11:34:12,025 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10302
+2026-03-03 11:34:12,366 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10324
+2026-03-03 11:34:12,366 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10325
+2026-03-03 11:34:12,367 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10327
+2026-03-03 11:34:12,367 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10289
+2026-03-03 11:34:12,840 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10350
+2026-03-03 11:34:12,841 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10351
+2026-03-03 11:34:12,841 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10352
+2026-03-03 11:34:12,842 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10353
+2026-03-03 11:34:12,842 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10354
+2026-03-03 11:34:12,842 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10314
+2026-03-03 11:34:12,843 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10349
+2026-03-03 11:34:12,843 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10313
+2026-03-03 11:34:12,844 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10305
+2026-03-03 11:34:12,844 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10301
+2026-03-03 11:34:13,063 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10370
+2026-03-03 11:34:13,063 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10372
+2026-03-03 11:34:13,408 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10309
+2026-03-03 11:34:13,409 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10355
+2026-03-03 11:34:13,409 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10356
+2026-03-03 11:34:13,409 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10357
+2026-03-03 11:34:13,410 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10308
+2026-03-03 11:34:13,741 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10320
+2026-03-03 11:34:13,742 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10322
+2026-03-03 11:34:13,742 - INFO - OCSC Scraper finished. Processed 0 new jobs.
+2026-03-03 11:34:14,357 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/alert "HTTP/1.1 200 OK"
+2026-03-03 11:37:07,996 - INFO - Starting scrape at https://job.ocsc.go.th/portal
+2026-03-03 11:37:09,369 - INFO - Found 9 agencies
+2026-03-03 11:37:10,814 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:11,721 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:12,962 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:13,848 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:14,714 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:15,679 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:16,890 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:17,822 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:18,970 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:20,163 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:21,375 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:21,637 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10289
+2026-03-03 11:37:23,281 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:24,268 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:25,589 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:26,788 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:28,060 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:29,303 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:30,529 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:31,725 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:33,259 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:34,911 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:36,138 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:37,317 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:38,527 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:39,715 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:40,907 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:42,141 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:43,379 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:44,586 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:45,861 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:46,964 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:48,079 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:49,926 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:51,074 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:52,206 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:53,112 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:54,135 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:55,007 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:55,920 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:56,896 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:57,909 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:37:58,964 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:38:00,356 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:38:01,554 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/jobs "HTTP/1.1 201 Created"
+2026-03-03 11:38:01,562 - INFO - OCSC Scraper finished. Processed 44 new jobs.
+2026-03-03 11:38:02,331 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/alert "HTTP/1.1 200 OK"
+2026-03-03 22:19:25,374 - INFO - Starting scrape at https://job.ocsc.go.th/portal
+2026-03-03 22:19:29,735 - INFO - Found 9 agencies
+2026-03-03 22:19:30,307 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10363
+2026-03-03 22:19:30,307 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10364
+2026-03-03 22:19:30,308 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10365
+2026-03-03 22:19:30,309 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10366
+2026-03-03 22:19:30,309 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10367
+2026-03-03 22:19:30,310 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10368
+2026-03-03 22:19:30,310 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10369
+2026-03-03 22:19:30,311 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10371
+2026-03-03 22:19:30,642 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10370
+2026-03-03 22:19:30,643 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10372
+2026-03-03 22:19:31,020 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10324
+2026-03-03 22:19:31,021 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10325
+2026-03-03 22:19:31,021 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10327
+2026-03-03 22:19:31,022 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10289
+2026-03-03 22:19:31,384 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10320
+2026-03-03 22:19:31,385 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10322
+2026-03-03 22:19:31,894 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10350
+2026-03-03 22:19:31,895 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10351
+2026-03-03 22:19:31,895 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10352
+2026-03-03 22:19:31,896 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10353
+2026-03-03 22:19:31,896 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10354
+2026-03-03 22:19:31,897 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10314
+2026-03-03 22:19:31,897 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10349
+2026-03-03 22:19:31,898 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10313
+2026-03-03 22:19:31,899 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10305
+2026-03-03 22:19:31,899 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10301
+2026-03-03 22:19:32,306 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10375
+2026-03-03 22:19:32,307 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10374
+2026-03-03 22:19:32,307 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10358
+2026-03-03 22:19:32,308 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10360
+2026-03-03 22:19:32,308 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10359
+2026-03-03 22:19:32,309 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10321
+2026-03-03 22:19:32,309 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10373
+2026-03-03 22:19:32,310 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10376
+2026-03-03 22:19:32,310 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10306
+2026-03-03 22:19:32,311 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10307
+2026-03-03 22:19:32,311 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10303
+2026-03-03 22:19:32,312 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10302
+2026-03-03 22:19:32,690 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10309
+2026-03-03 22:19:32,691 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10355
+2026-03-03 22:19:32,692 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10356
+2026-03-03 22:19:32,693 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10357
+2026-03-03 22:19:32,693 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10308
+2026-03-03 22:19:32,936 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10319
+2026-03-03 22:19:33,183 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10289
+2026-03-03 22:19:33,183 - INFO - OCSC Scraper finished. Processed 0 new jobs.
+2026-03-03 22:19:34,602 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/alert "HTTP/1.1 200 OK"
+2026-03-03 23:19:48,063 - INFO - Starting scrape at https://job.ocsc.go.th/portal
+2026-03-03 23:19:52,354 - INFO - Found 9 agencies
+2026-03-03 23:19:52,874 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10363
+2026-03-03 23:19:52,874 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10364
+2026-03-03 23:19:52,875 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10365
+2026-03-03 23:19:52,875 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10366
+2026-03-03 23:19:52,876 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10367
+2026-03-03 23:19:52,877 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10368
+2026-03-03 23:19:52,878 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10369
+2026-03-03 23:19:52,878 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10371
+2026-03-03 23:19:53,124 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10370
+2026-03-03 23:19:53,125 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10372
+2026-03-03 23:19:53,490 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10324
+2026-03-03 23:19:53,491 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10325
+2026-03-03 23:19:53,491 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10327
+2026-03-03 23:19:53,492 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10289
+2026-03-03 23:19:53,838 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10320
+2026-03-03 23:19:53,839 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10322
+2026-03-03 23:19:54,340 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10350
+2026-03-03 23:19:54,341 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10351
+2026-03-03 23:19:54,341 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10352
+2026-03-03 23:19:54,342 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10353
+2026-03-03 23:19:54,342 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10354
+2026-03-03 23:19:54,343 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10314
+2026-03-03 23:19:54,344 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10349
+2026-03-03 23:19:54,344 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10313
+2026-03-03 23:19:54,345 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10305
+2026-03-03 23:19:54,345 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10301
+2026-03-03 23:19:54,761 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10375
+2026-03-03 23:19:54,761 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10374
+2026-03-03 23:19:54,762 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10358
+2026-03-03 23:19:54,763 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10360
+2026-03-03 23:19:54,763 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10359
+2026-03-03 23:19:54,764 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10321
+2026-03-03 23:19:54,764 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10373
+2026-03-03 23:19:54,765 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10376
+2026-03-03 23:19:54,766 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10306
+2026-03-03 23:19:54,766 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10307
+2026-03-03 23:19:54,767 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10303
+2026-03-03 23:19:54,767 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10302
+2026-03-03 23:19:55,138 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10309
+2026-03-03 23:19:55,138 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10355
+2026-03-03 23:19:55,139 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10356
+2026-03-03 23:19:55,139 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10357
+2026-03-03 23:19:55,140 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10308
+2026-03-03 23:19:55,373 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10319
+2026-03-03 23:19:55,612 - INFO - Skipping already processed job: https://job.ocsc.go.th/portal/jobs/10289
+2026-03-03 23:19:55,612 - INFO - OCSC Scraper finished. Processed 0 new jobs.
+2026-03-03 23:19:56,468 - INFO - HTTP Request: POST http://localhost:3000/api/scraper/alert "HTTP/1.1 200 OK"

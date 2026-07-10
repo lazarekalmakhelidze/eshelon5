@@ -1,0 +1,1 @@
+const fs = require('fs'); let content = fs.readFileSync('worker/src/index.ts', 'utf8'); content = content.replace('        if (url.pathname === "/api/admin/messages") return json([]);\r\n', ''); content = content.replace('        if (url.pathname === "/api/admin/reports") return json([]);\r\n', ''); fs.writeFileSync('worker/src/index.ts', content);
