@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Retro FPS (Raycaster)</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #000; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; font-family: 'Courier New', Courier, monospace; }
+    
+    #gameContainer { position: relative; width: 800px; height: 450px; background: #333; box-shadow: 0 0 20px rgba(0,255,0,0.2); }
+    canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+    
+    /* Gun overlay */
+    #gun { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); width: 250px; height: 250px; background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="40" y="40" width="20" height="60" fill="%23555"/><rect x="35" y="40" width="30" height="20" fill="%23333"/><rect x="45" y="30" width="10" height="10" fill="%23111"/></svg>') no-repeat center bottom; background-size: contain; transition: transform 0.05s; }
+    .shoot-anim { transform: translateX(-50%) translateY(20px) !important; }
+    
+    /* Crosshair */
+    #crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; border: 2px solid rgba(0,255,0,0.5); border-radius: 50%; pointer-events: none; }
+    #crosshair::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 4px; height: 4px; background: rgba(0,255,0,0.8); border-radius: 50%; }
+
+    /* HUD */
+    #hud { position: absolute; bottom: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; font-size: 1.5rem; font-weight: bold; color: #0f0; text-shadow: 2px 2px 0 #000; pointer-events: none; }
+    
+    /* Overlays */
+    #overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; }
+    #overlay h1 { font-size: 4rem; color: #e74c3c; margin-bottom: 10px; text-shadow: 0 0 10px red; }
+    #overlay p { font-size: 1.2rem; color: #ccc; margin-bottom: 20px; }
+    button { background: #e74c3c; color: #fff; border: none; padding: 15px 40px; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: 0.2s; border: 2px solid #fff; }
+    button:hover { background: #c0392b; transform: scale(1.05); }
+
+    /* Flash screen for damage/shooting */
+    #flash { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.1s; }
+  </style>
+
+<style>/* global-responsive-fix */ canvas, #gameContainer { max-width: 100vw !important; max-height: 100vh !important; object-fit: contain !important; } body { overflow: hidden !important; touch-action: none; }</style>
+</head>
+<body>
+
+<div id="gameContainer">
+  <canvas id="gameCanvas" width="400" height="225"></canvas>
+  <div id="gun"></div>
+  <div id="crosshair"></div>
+  <div id="flash"></div>
+  
+  <div id="hud">
+    <div>HP: <span id="hpVal">100</span></div>
+    <div>SCORE: <span id="scoreVal">0</span></div>
+  </div>
+
+  <div id="overlay">
+    <h1 id="titleText">RETRO SHOOTER</h1>
+    <p id="subText">คลิกเมาส์เพื่อล็อคหน้าจอ (Pointer Lock)<br>ใช้เมาส์หันมุมกล้อง, W A S D เดิน, คลิกซ้ายยิง</p>
+    <button id="startBtn">PLAY</button>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const startBtn = document.getElementById('startBtn');
+const overlay = document.getElementById('overlay');
+const gunEl = document.getElementById('gun');
+const flashEl = document.getElementById('flash');
+const hpVal = document.getElementById('hpVal');
+const scoreVal = document.getElementById('scoreVal');
+const gameContainer = document.getElementById('gameContainer');
+
+const SW = canvas.width;
+const SH = canvas.height;
+const FOV = Math.PI / 3;
+
+// Game State
+let gameState = 'menu'; // menu, playing, gameover
+let score = 0;
+let lastTime = 0;
+
+// Keys
+const keys = {};
+window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+// Map (1 = Wall, 0 = Floor)
+const mapSize = 16;
+const map = [
+  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+  1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,
+  1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,
+  1,0,0,1,1,0,1,0,1,1,1,1,1,0,0,1,
+  1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,1,
+  1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,1,
+  1,0,0,1,1,1,1,0,1,1,1,1,1,0,0,1,
+  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+  1,1,1,1,1,0,1,1,1,0,1,1,1,1,1,1,
+  1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,
+  1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,
+  1,0,1,1,1,1,1,0,0,0,1,1,1,0,0,1,
+  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+  1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+];
+
+// Player
+const player = {
+  x: 2.5, y: 2.5,
+  dir: 0, // angle
+  hp: 100,
+  moveSpeed: 3.0,
+  rotSpeed: 2.0
+};
+
+// Enemies
+let enemies = [];
+class Enemy {
+  constructor(x, y) {
+    this.x = x; this.y = y;
+    this.hp = 30;
+    this.state = 'idle'; // idle, aggro, dead
+    this.timer = 0;
+  }
+}
+
+function spawnEnemies() {
+  enemies = [
+    new Enemy(13.5, 2.5), new Enemy(13.5, 13.5), new Enemy(2.5, 13.5),
+    new Enemy(7.5, 8.5), new Enemy(8.5, 8.5), new Enemy(4.5, 8.5)
+  ];
+}
+
+// Pointer Lock for Mouse Look
+gameContainer.addEventListener('click', () => {
+  if (gameState === 'playing') {
+    gameContainer.requestPointerLock();
+  }
+});
+document.addEventListener('mousemove', (e) => {
+  if (document.pointerLockElement === gameContainer && gameState === 'playing') {
+    player.dir += e.movementX * 0.003;
+  }
+});
+document.addEventListener('mousedown', (e) => {
+  if (document.pointerLockElement === gameContainer && gameState === 'playing') {
+    shoot();
+  }
+});
+
+function shoot() {
+  if (gameState !== 'playing') return;
+  // Gun anim
+  gunEl.classList.add('shoot-anim');
+  setTimeout(() => gunEl.classList.remove('shoot-anim'), 100);
+  
+  // Flash
+  flashEl.style.background = 'rgba(255,255,0,0.3)';
+  flashEl.style.opacity = 1;
+  setTimeout(() => flashEl.style.opacity = 0, 50);
+  
+  // Hitscan Raycast
+  let rayDirX = Math.cos(player.dir);
+  let rayDirY = Math.sin(player.dir);
+  
+  // Check hit on enemies
+  let hitEnemy = null;
+  let closestDist = Infinity;
+  
+  for (let i = 0; i < enemies.length; i++) {
+    let e = enemies[i];
+    if (e.hp <= 0) continue;
+    
+    // Vector to enemy
+    let vx = e.x - player.x;
+    let vy = e.y - player.y;
+    let dist = Math.sqrt(vx*vx + vy*vy);
+    
+    // Angle to enemy
+    let angleToEnemy = Math.atan2(vy, vx) - player.dir;
+    // Normalize angle
+    while (angleToEnemy < -Math.PI) angleToEnemy += 2*Math.PI;
+    while (angleToEnemy > Math.PI) angleToEnemy -= 2*Math.PI;
+    
+    // If enemy is roughly in center of screen
+    if (Math.abs(angleToEnemy) < 0.1 && dist < closestDist) {
+      // Simple line of sight check (prevent shooting through walls)
+      let hasLineOfSight = true;
+      let step = 0.5;
+      for (let d = 0; d < dist; d += step) {
+        let cx = Math.floor(player.x + rayDirX * d);
+        let cy = Math.floor(player.y + rayDirY * d);
+        if (map[cy * mapSize + cx] > 0) { hasLineOfSight = false; break; }
+      }
+      
+      if (hasLineOfSight) {
+        closestDist = dist;
+        hitEnemy = e;
+      }
+    }
+  }
+  
+  if (hitEnemy) {
+    hitEnemy.hp -= 15;
+    hitEnemy.state = 'aggro';
+    if (hitEnemy.hp <= 0) {
+      score += 100;
+      scoreVal.textContent = score;
+    }
+  }
+}
+
+function takeDamage(amount) {
+  player.hp -= amount;
+  hpVal.textContent = Math.max(0, player.hp);
+  flashEl.style.background = 'rgba(255,0,0,0.5)';
+  flashEl.style.opacity = 1;
+  setTimeout(() => flashEl.style.opacity = 0, 100);
+  
+  if (player.hp <= 0) {
+    gameOver();
+  }
+}
+
+function update(dt) {
+  // Movement
+  let moveStep = player.moveSpeed * dt;
+  let rotStep = player.rotSpeed * dt;
+  
+  // Arrow keys (turning) if not using mouse
+  if (keys['arrowleft']) player.dir -= rotStep;
+  if (keys['arrowright']) player.dir += rotStep;
+  
+  let dx = 0, dy = 0;
+  let moveAngle = player.dir;
+  
+  if (keys['w']) { dx += Math.cos(moveAngle) * moveStep; dy += Math.sin(moveAngle) * moveStep; }
+  if (keys['s']) { dx -= Math.cos(moveAngle) * moveStep; dy -= Math.sin(moveAngle) * moveStep; }
+  if (keys['a']) { dx += Math.cos(moveAngle - Math.PI/2) * moveStep; dy += Math.sin(moveAngle - Math.PI/2) * moveStep; }
+  if (keys['d']) { dx += Math.cos(moveAngle + Math.PI/2) * moveStep; dy += Math.sin(moveAngle + Math.PI/2) * moveStep; }
+  
+  // Collision
+  let newX = player.x + dx;
+  let newY = player.y + dy;
+  if (map[Math.floor(player.y) * mapSize + Math.floor(newX)] === 0) player.x = newX;
+  if (map[Math.floor(newY) * mapSize + Math.floor(player.x)] === 0) player.y = newY;
+  
+  // Update Enemies
+  for (let e of enemies) {
+    if (e.hp <= 0) continue;
+    let dist = Math.hypot(e.x - player.x, e.y - player.y);
+    
+    // Aggro if close
+    if (dist < 6) e.state = 'aggro';
+    
+    if (e.state === 'aggro') {
+      // Move towards player
+      if (dist > 1.5) {
+        let ex = e.x + Math.sign(player.x - e.x) * 1.5 * dt;
+        let ey = e.y + Math.sign(player.y - e.y) * 1.5 * dt;
+        if (map[Math.floor(e.y) * mapSize + Math.floor(ex)] === 0) e.x = ex;
+        if (map[Math.floor(ey) * mapSize + Math.floor(e.x)] === 0) e.y = ey;
+      } else {
+        // Attack
+        e.timer += dt;
+        if (e.timer > 1.0) { // Attack every 1 sec
+          e.timer = 0;
+          takeDamage(10);
+        }
+      }
+    }
+  }
+}
+
+function draw() {
+  // Floor & Ceiling
+  ctx.fillStyle = '#222';
+  ctx.fillRect(0, 0, SW, SH/2); // Ceiling
+  ctx.fillStyle = '#444';
+  ctx.fillRect(0, SH/2, SW, SH/2); // Floor
+  
+  let zBuffer = new Array(SW).fill(0);
+  
+  // Raycasting
+  for (let x = 0; x < SW; x++) {
+    // calculate ray position and direction
+    let cameraX = 2 * x / SW - 1; // x-coordinate in camera space
+    let rayDirX = Math.cos(player.dir) + Math.cos(player.dir + Math.PI/2) * cameraX;
+    let rayDirY = Math.sin(player.dir) + Math.sin(player.dir + Math.PI/2) * cameraX;
+    
+    // Normalize raydir
+    let mag = Math.sqrt(rayDirX*rayDirX + rayDirY*rayDirY);
+    rayDirX /= mag; rayDirY /= mag;
+    
+    let mapX = Math.floor(player.x);
+    let mapY = Math.floor(player.y);
+    
+    let sideDistX, sideDistY;
+    let deltaDistX = Math.abs(1 / rayDirX);
+    let deltaDistY = Math.abs(1 / rayDirY);
+    let perpWallDist;
+    
+    let stepX, stepY;
+    let hit = 0;
+    let side;
+    
+    if (rayDirX < 0) { stepX = -1; sideDistX = (player.x - mapX) * deltaDistX; } 
+    else { stepX = 1; sideDistX = (mapX + 1.0 - player.x) * deltaDistX; }
+    
+    if (rayDirY < 0) { stepY = -1; sideDistY = (player.y - mapY) * deltaDistY; } 
+    else { stepY = 1; sideDistY = (mapY + 1.0 - player.y) * deltaDistY; }
+    
+    // DDA Algorithm
+    while (hit === 0) {
+      if (sideDistX < sideDistY) { sideDistX += deltaDistX; mapX += stepX; side = 0; } 
+      else { sideDistY += deltaDistY; mapY += stepY; side = 1; }
+      
+      if (map[mapY * mapSize + mapX] > 0) hit = 1;
+    }
+    
+    if (side === 0) perpWallDist = (mapX - player.x + (1 - stepX) / 2) / rayDirX;
+    else perpWallDist = (mapY - player.y + (1 - stepY) / 2) / rayDirY;
+    
+    // Calculate line height
+    let lineHeight = Math.floor(SH / perpWallDist);
+    let drawStart = -lineHeight / 2 + SH / 2;
+    if(drawStart < 0) drawStart = 0;
+    let drawEnd = lineHeight / 2 + SH / 2;
+    if(drawEnd >= SH) drawEnd = SH - 1;
+    
+    // Choose wall color
+    let color = side === 1 ? '#556' : '#667';
+    // Darken based on distance
+    let shadow = Math.max(0, 1 - perpWallDist / 12);
+    ctx.fillStyle = color;
+    ctx.globalAlpha = shadow;
+    ctx.fillRect(x, drawStart, 1, drawEnd - drawStart);
+    ctx.globalAlpha = 1;
+    
+    zBuffer[x] = perpWallDist;
+  }
+  
+  // Draw Enemies (Sprites)
+  // Sort enemies from far to close
+  let sortedEnemies = enemies.slice().sort((a,b) => {
+    let distA = (player.x - a.x)**2 + (player.y - a.y)**2;
+    let distB = (player.x - b.x)**2 + (player.y - b.y)**2;
+    return distB - distA;
+  });
+  
+  for (let e of sortedEnemies) {
+    let spriteX = e.x - player.x;
+    let spriteY = e.y - player.y;
+    
+    let invDet = 1.0 / (Math.cos(player.dir)*Math.cos(player.dir) - Math.sin(player.dir)*Math.sin(player.dir)*-1); // simplified
+    // Standard camera transform
+    let planeX = Math.cos(player.dir + Math.PI/2);
+    let planeY = Math.sin(player.dir + Math.PI/2);
+    let dirX = Math.cos(player.dir);
+    let dirY = Math.sin(player.dir);
+    
+    let invDet2 = 1.0 / (planeX * dirY - dirX * planeY);
+    let transformX = invDet2 * (dirY * spriteX - dirX * spriteY);
+    let transformY = invDet2 * (-planeY * spriteX + planeX * spriteY);
+    
+    let spriteScreenX = Math.floor((SW / 2) * (1 + transformX / transformY));
+    
+    if (transformY > 0) {
+      let spriteHeight = Math.abs(Math.floor(SH / transformY));
+      let drawStartY = -spriteHeight / 2 + SH / 2;
+      let drawEndY = spriteHeight / 2 + SH / 2;
+      
+      let spriteWidth = Math.abs(Math.floor(SH / transformY));
+      let drawStartX = -spriteWidth / 2 + spriteScreenX;
+      let drawEndX = spriteWidth / 2 + spriteScreenX;
+      
+      for (let stripe = drawStartX; stripe < drawEndX; stripe++) {
+        if (transformY > 0 && stripe > 0 && stripe < SW && transformY < zBuffer[Math.floor(stripe)]) {
+          // Draw simple colored rect for enemy
+          if (e.hp > 0) {
+            ctx.fillStyle = e.state === 'aggro' ? '#e74c3c' : '#c0392b';
+          } else {
+            ctx.fillStyle = '#555'; // dead body
+            drawStartY = SH/2; // flat on floor
+          }
+          // Simple fake pixel art texture: darken edges
+          ctx.fillRect(stripe, drawStartY, 1, drawEndY - drawStartY);
+        }
+      }
+    }
+  }
+}
+
+function gameLoop(timestamp) {
+  if (gameState !== 'playing') return;
+  
+  let dt = (timestamp - lastTime) / 1000;
+  if (dt > 0.1) dt = 0.1; // cap
+  lastTime = timestamp;
+  
+  update(dt);
+  draw();
+  
+  // Respawn enemies if all dead
+  if (enemies.every(e => e.hp <= 0)) {
+    spawnEnemies();
+    player.hp = Math.min(100, player.hp + 20); // heal
+    hpVal.textContent = player.hp;
+    score += 500;
+    scoreVal.textContent = score;
+    flashEl.style.background = 'rgba(0,255,0,0.3)';
+    flashEl.style.opacity = 1;
+    setTimeout(() => flashEl.style.opacity = 0, 100);
+  }
+  
+  requestAnimationFrame(gameLoop);
+}
+
+function gameOver() {
+  gameState = 'gameover';
+  document.exitPointerLock();
+  overlay.style.display = 'flex';
+  document.getElementById('titleText').textContent = "YOU DIED";
+  document.getElementById('subText').textContent = `คะแนนของคุณ: ${score}`;
+  startBtn.textContent = "เล่นอีกครั้ง";
+  window.parent?.postMessage({ type: 'GAME_OVER', score: score }, '*');
+}
+
+startBtn.addEventListener('click', () => {
+  player.x = 2.5; player.y = 2.5; player.dir = 0; player.hp = 100;
+  score = 0;
+  hpVal.textContent = player.hp;
+  scoreVal.textContent = score;
+  spawnEnemies();
+  
+  overlay.style.display = 'none';
+  gameState = 'playing';
+  gameContainer.requestPointerLock();
+  lastTime = performance.now();
+  requestAnimationFrame(gameLoop);
+});
+</script>
+</body>
+</html>

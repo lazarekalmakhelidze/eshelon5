@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AA Game</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #e5e5e5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+      color: #333;
+    }
+    #gameContainer {
+      position: relative;
+      width: 400px;
+      height: 600px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    #ui {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.9);
+      z-index: 10;
+    }
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 10px;
+      color: #111;
+    }
+    p {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      color: #555;
+    }
+    button {
+      pointer-events: auto;
+      background: #111;
+      color: #fff;
+      border: none;
+      padding: 12px 30px;
+      font-size: 1.2rem;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #333;
+    }
+    #scoreDisplay {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #333;
+    }
+    #levelDisplay {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
+
+<style>/* global-responsive-fix */ canvas, #gameContainer { max-width: 100vw !important; max-height: 100vh !important; object-fit: contain !important; } body { overflow: hidden !important; touch-action: none; }</style>
+</head>
+<body>
+
+<div id="gameContainer">
+  <div id="scoreDisplay" style="display:none">Score: <span id="scoreVal">0</span></div>
+  <div id="levelDisplay" style="display:none">Level: <span id="levelVal">1</span></div>
+  <canvas id="gameCanvas" width="400" height="600"></canvas>
+  <div id="ui">
+    <h1>aa</h1>
+    <p>คลิกเพื่อยิงเข็ม อย่าให้ชนกัน!</p>
+    <button id="startBtn">เริ่มเกม</button>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const ui = document.getElementById('ui');
+const startBtn = document.getElementById('startBtn');
+const scoreDisplay = document.getElementById('scoreDisplay');
+const levelDisplay = document.getElementById('levelDisplay');
+const scoreVal = document.getElementById('scoreVal');
+const levelVal = document.getElementById('levelVal');
+
+// Game constants
+const CENTER_X = 200;
+const CENTER_Y = 220;
+const MAIN_RADIUS = 50;
+const PIN_LENGTH = 100;
+const PIN_RADIUS = 6;
+const SHOOT_START_Y = 500;
+
+// Game state
+let level = 1;
+let score = 0;
+let rotationAngle = 0;
+let rotationSpeed = 0.02;
+let pinsOnCircle = []; // { angle: number }
+let pinsToShoot = 0;
+let state = 'menu'; // menu, playing, animating, gameover, levelclear
+let bullet = null; // { y: number }
+
+function initLevel() {
+  const initialPinsCount = Math.min(3 + level, 12);
+  pinsToShoot = 5 + level * 2;
+  rotationSpeed = 0.02 + (level * 0.005);
+  // toggle direction sometimes
+  if (level % 3 === 0) rotationSpeed *= -1;
+
+  pinsOnCircle = [];
+  const angleStep = (Math.PI * 2) / initialPinsCount;
+  for (let i = 0; i < initialPinsCount; i++) {
+    pinsOnCircle.push({ angle: i * angleStep });
+  }
+
+  bullet = null;
+  state = 'playing';
+  updateHUD();
+}
+
+function startGame() {
+  level = 1;
+  score = 0;
+  scoreDisplay.style.display = 'block';
+  levelDisplay.style.display = 'block';
+  ui.style.display = 'none';
+  initLevel();
+  if (!animFrame) gameLoop();
+}
+
+startBtn.addEventListener('click', startGame);
+
+canvas.addEventListener('mousedown', shoot);
+canvas.addEventListener('touchstart', (e) => { e.preventDefault(); shoot(); }, {passive: false});
+
+function shoot() {
+  if (state !== 'playing' || bullet !== null || pinsToShoot <= 0) return;
+  bullet = { y: SHOOT_START_Y };
+  pinsToShoot--;
+  updateHUD();
+}
+
+function updateHUD() {
+  scoreVal.textContent = score;
+  levelVal.textContent = level;
+}
+
+function drawLine(x1, y1, x2, y2) {
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = '#111';
+  ctx.stroke();
+}
+
+function drawCircle(x, y, r, fill) {
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fillStyle = fill;
+  ctx.fill();
+}
+
+function drawText(text, x, y, size, color) {
+  ctx.fillStyle = color;
+  ctx.font = `bold ${size}px 'Segoe UI', sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, x, y);
+}
+
+function update() {
+  if (state === 'menu') return;
+
+  rotationAngle += rotationSpeed;
+
+  if (bullet !== null) {
+    bullet.y -= 25; // bullet speed
+    
+    // Check collision with main circle
+    if (bullet.y <= CENTER_Y + MAIN_RADIUS + PIN_LENGTH) {
+      // Hit!
+      // Calculate angle of the hit
+      // The bullet comes from bottom (which is PI/2 in normal math, but let's align carefully)
+      // Circle rotates. The absolute angle of bottom is Math.PI/2.
+      // We need to find the relative angle on the circle.
+      let hitAngle = (Math.PI / 2) - rotationAngle;
+      
+      // Normalize hitAngle to 0 - 2PI
+      while (hitAngle < 0) hitAngle += Math.PI * 2;
+      while (hitAngle >= Math.PI * 2) hitAngle -= Math.PI * 2;
+
+      // Check collision with other pins
+      let collision = false;
+      const hitThreshold = 0.15; // radians (~8.5 degrees)
+      
+      for (let p of pinsOnCircle) {
+        let pAngle = p.angle;
+        while (pAngle < 0) pAngle += Math.PI * 2;
+        while (pAngle >= Math.PI * 2) pAngle -= Math.PI * 2;
+        
+        let diff = Math.abs(pAngle - hitAngle);
+        if (diff > Math.PI) diff = Math.PI * 2 - diff;
+        
+        if (diff < hitThreshold) {
+          collision = true;
+          break;
+        }
+      }
+
+      if (collision) {
+        state = 'gameover';
+        setTimeout(showGameOver, 1000);
+      } else {
+        // Success
+        pinsOnCircle.push({ angle: hitAngle });
+        score += 10;
+        updateHUD();
+        bullet = null;
+
+        if (pinsToShoot === 0) {
+          state = 'levelclear';
+          setTimeout(() => {
+            level++;
+            initLevel();
+          }, 1000);
+        }
+      }
+    }
+  }
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (state === 'menu') return;
+
+  // Draw main rotating circle
+  drawCircle(CENTER_X, CENTER_Y, MAIN_RADIUS, '#111');
+  drawText(level, CENTER_X, CENTER_Y, 40, '#fff');
+
+  // Draw pins on circle
+  for (let p of pinsOnCircle) {
+    const absAngle = p.angle + rotationAngle;
+    const pinEndX = CENTER_X + Math.cos(absAngle) * (MAIN_RADIUS + PIN_LENGTH);
+    const pinEndY = CENTER_Y + Math.sin(absAngle) * (MAIN_RADIUS + PIN_LENGTH);
+    
+    drawLine(CENTER_X, CENTER_Y, pinEndX, pinEndY);
+    drawCircle(pinEndX, pinEndY, PIN_RADIUS, '#111');
+  }
+
+  // Draw current bullet
+  if (bullet !== null) {
+    drawLine(CENTER_X, bullet.y, CENTER_X, bullet.y + PIN_LENGTH);
+    drawCircle(CENTER_X, bullet.y, PIN_RADIUS, '#111');
+  }
+
+  // Draw queue (just circles at bottom)
+  if (state === 'playing') {
+    let queueY = SHOOT_START_Y + PIN_LENGTH + 20;
+    // draw up to 5 dots to show queue
+    let toDraw = Math.min(pinsToShoot, 5);
+    for (let i = 0; i < toDraw; i++) {
+      drawCircle(CENTER_X, queueY + (i * 20), PIN_RADIUS, '#111');
+    }
+    if (pinsToShoot > 5) {
+      drawText('+', CENTER_X + 15, queueY + 40, 16, '#111');
+    }
+    
+    // The main bullet ready to shoot
+    if (bullet === null && pinsToShoot > 0) {
+      drawCircle(CENTER_X, SHOOT_START_Y, PIN_RADIUS, '#111');
+      drawLine(CENTER_X, SHOOT_START_Y, CENTER_X, SHOOT_START_Y + PIN_LENGTH);
+      drawText(pinsToShoot, CENTER_X, SHOOT_START_Y - 15, 16, '#111');
+    }
+  }
+
+  if (state === 'gameover') {
+    ctx.fillStyle = 'rgba(255,0,0,0.3)';
+    ctx.fillRect(0,0,canvas.width, canvas.height);
+  }
+  if (state === 'levelclear') {
+    ctx.fillStyle = 'rgba(0,255,0,0.3)';
+    ctx.fillRect(0,0,canvas.width, canvas.height);
+  }
+}
+
+function showGameOver() {
+  ui.style.display = 'flex';
+  ui.innerHTML = `
+    <h1>Game Over</h1>
+    <p>Level: ${level} | Score: ${score}</p>
+    <button onclick="location.reload()">เล่นใหม่</button>
+  `;
+  window.parent?.postMessage({ type: 'GAME_OVER', score: score }, '*');
+}
+
+let animFrame;
+function gameLoop() {
+  update();
+  draw();
+  animFrame = requestAnimationFrame(gameLoop);
+}
+
+// Draw initial state
+draw();
+
+</script>
+</body>
+</html>

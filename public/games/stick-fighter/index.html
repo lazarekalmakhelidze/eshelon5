@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stick Fighter (PvE)</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #111; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+    #gameContainer { position: relative; width: 800px; height: 450px; background: linear-gradient(#2c3e50, #34495e); border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden; }
+    canvas { display: block; width: 100%; height: 100%; }
+    .hud { position: absolute; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: flex-start; z-index: 10; pointer-events: none; }
+    .health-box { width: 40%; }
+    .name { font-weight: bold; font-size: 1.2rem; margin-bottom: 5px; text-shadow: 1px 1px 2px #000; }
+    .p1-name { color: #3498db; }
+    .p2-name { color: #e74c3c; text-align: right; }
+    .health-bar-bg { background: #333; height: 20px; border-radius: 10px; border: 2px solid #000; overflow: hidden; }
+    .health-bar { height: 100%; transition: width 0.1s linear; }
+    #p1-health { background: #3498db; width: 100%; }
+    #p2-health { background: #e74c3c; width: 100%; transform-origin: right; float: right; }
+    #timer { font-size: 2.5rem; font-weight: 900; color: #f1c40f; text-shadow: 2px 2px 0 #000; }
+    
+    #overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; }
+    #overlay h1 { font-size: 3.5rem; color: #fff; margin-bottom: 10px; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+    #overlay p { font-size: 1.2rem; color: #ccc; margin-bottom: 20px; text-align: center; }
+    .controls-hint { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: left; font-size: 0.9rem; }
+    button { background: #e74c3c; color: #fff; border: none; padding: 12px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 30px; cursor: pointer; transition: 0.2s; box-shadow: 0 5px 15px rgba(231,76,60,0.4); }
+    button:hover { transform: scale(1.05); background: #c0392b; }
+    
+    #botLevel { background: #222; color: #fff; border: 1px solid #555; padding: 5px 10px; border-radius: 5px; font-size: 1rem; margin-bottom: 15px; }
+    #mobile-controls { display: none; position: absolute; bottom: 20px; left: 0; right: 0; padding: 0 20px; justify-content: space-between; z-index: 15; user-select: none; pointer-events: auto; }
+    .d-pad, .action-pad { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .d-pad-row { display: flex; gap: 40px; }
+    #mobile-controls button { width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.5); color: white; font-weight: bold; font-size: 14px; touch-action: none; box-shadow: 0 4px 6px rgba(0,0,0,0.3); padding: 0; margin: 0; }
+    #mobile-controls button:active { background: rgba(255,255,255,0.6) !important; transform: scale(0.9); }
+    @media (max-width: 800px) {
+      #gameContainer { width: 100vw; height: 100vh; border-radius: 0; }
+      #gameCanvas { object-fit: contain; width: 100%; height: 100%; }
+      #mobile-controls { display: flex; }
+      .controls-hint { display: none; }
+    }
+  </style>
+
+<style>/* global-responsive-fix */ canvas, #gameContainer { max-width: 100vw !important; max-height: 100vh !important; object-fit: contain !important; } body { overflow: hidden !important; touch-action: none; }</style>
+</head>
+<body>
+
+<div id="gameContainer">
+  <div class="hud">
+    <div class="health-box">
+      <div class="name p1-name">คุณ (Player)</div>
+      <div class="health-bar-bg"><div class="health-bar" id="p1-health"></div></div>
+    </div>
+    <div id="timer">60</div>
+    <div class="health-box">
+      <div class="name p2-name">บอท (AI)</div>
+      <div class="health-bar-bg"><div class="health-bar" id="p2-health"></div></div>
+    </div>
+  </div>
+  
+  <canvas id="gameCanvas" width="800" height="450"></canvas>
+  
+  <div id="mobile-controls">
+    <div class="d-pad">
+      <button id="btn-w">W</button>
+      <div class="d-pad-row">
+        <button id="btn-a">A</button>
+        <button id="btn-d">D</button>
+      </div>
+    </div>
+    <div class="action-pad">
+      <div style="display: flex; gap: 10px;">
+        <button id="btn-j" style="background: rgba(231,76,60,0.5);">👊</button>
+        <button id="btn-k" style="background: rgba(231,76,60,0.5);">🦵</button>
+      </div>
+      <button id="btn-l" style="background: rgba(52,152,219,0.5); width: 100px; border-radius: 20px;">🛡️</button>
+    </div>
+  </div>
+  
+  <div id="overlay">
+    <h1 id="titleText">STICK FIGHTER</h1>
+    <p id="subText">ต่อสู้กับบอท AI สุดโหด!</p>
+    
+    <select id="botLevel">
+      <option value="easy">บอท: ระดับง่าย (Easy)</option>
+      <option value="normal" selected>บอท: ระดับปานกลาง (Normal)</option>
+      <option value="hard">บอท: ระดับยาก (Hard)</option>
+    </select>
+
+    <div class="controls-hint" id="ctrlHint">
+      <strong>วิธีบังคับ (Player 1):</strong><br>
+      A / D - เดินซ้ายขวา<br>
+      W - กระโดด<br>
+      J - ต่อย (Punch)<br>
+      K - เตะ (Kick)<br>
+      L - ป้องกัน (Block)
+    </div>
+    <button id="startBtn">เริ่มเกม</button>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const overlay = document.getElementById('overlay');
+const startBtn = document.getElementById('startBtn');
+const titleText = document.getElementById('titleText');
+const subText = document.getElementById('subText');
+const ctrlHint = document.getElementById('ctrlHint');
+const botLevelSelect = document.getElementById('botLevel');
+const p1HealthBar = document.getElementById('p1-health');
+const p2HealthBar = document.getElementById('p2-health');
+const timerEl = document.getElementById('timer');
+
+const GRAVITY = 0.8;
+const GROUND_Y = 380;
+let gameState = 'menu'; // menu, playing, gameover
+let timer = 60;
+let lastTime = 0;
+let timerInterval;
+
+const keys = {};
+window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+const bindTouch = (id, key) => {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('touchstart', (e) => { e.preventDefault(); keys[key] = true; });
+  el.addEventListener('touchend', (e) => { e.preventDefault(); keys[key] = false; });
+  // Also support mouse for testing on desktop
+  el.addEventListener('mousedown', (e) => { e.preventDefault(); keys[key] = true; });
+  el.addEventListener('mouseup', (e) => { e.preventDefault(); keys[key] = false; });
+  el.addEventListener('mouseleave', (e) => { e.preventDefault(); keys[key] = false; });
+};
+bindTouch('btn-w', 'w');
+bindTouch('btn-a', 'a');
+bindTouch('btn-d', 'd');
+bindTouch('btn-j', 'j');
+bindTouch('btn-k', 'k');
+bindTouch('btn-l', 'l');
+
+class Fighter {
+  constructor(x, color, isBot = false) {
+    this.x = x;
+    this.y = GROUND_Y;
+    this.width = 40;
+    this.height = 100;
+    this.color = color;
+    this.isBot = isBot;
+    
+    this.vx = 0;
+    this.vy = 0;
+    this.speed = 5;
+    this.jumpForce = -15;
+    
+    this.hp = 100;
+    this.isDead = false;
+    this.dir = isBot ? -1 : 1; // 1 = right, -1 = left
+    
+    this.state = 'idle'; // idle, walk, jump, punch, kick, block, hit
+    this.stateTimer = 0;
+    this.attackBox = { x: 0, y: 0, w: 60, h: 20, active: false, damage: 0, hitType: '' };
+    
+    // AI vars
+    this.botTimer = 0;
+  }
+  
+  update(opp) {
+    if (this.isDead) return;
+    
+    // Face opponent if not attacking
+    if (this.state === 'idle' || this.state === 'walk') {
+      this.dir = opp.x > this.x ? 1 : -1;
+    }
+
+    // Apply Gravity
+    this.vy += GRAVITY;
+    this.y += this.vy;
+    if (this.y >= GROUND_Y) {
+      this.y = GROUND_Y;
+      this.vy = 0;
+    }
+    
+    // State logic
+    if (this.stateTimer > 0) {
+      this.stateTimer--;
+      if (this.stateTimer <= 0) {
+        this.state = 'idle';
+        this.attackBox.active = false;
+      }
+    }
+    
+    if (this.state === 'punch' || this.state === 'kick') {
+      this.vx = 0;
+      // Activate hitbox in the middle of animation
+      if (this.stateTimer === 15) {
+        this.attackBox.active = true;
+        this.attackBox.damage = this.state === 'punch' ? 5 : 10;
+        this.attackBox.hitType = this.state;
+      }
+      if (this.stateTimer < 10) this.attackBox.active = false;
+    }
+    
+    if (this.state === 'hit') this.vx = 0; // stunned
+    
+    // Apply Movement
+    this.x += this.vx;
+    // Bounds
+    if (this.x < 20) this.x = 20;
+    if (this.x > 780 - this.width) this.x = 780 - this.width;
+    
+    // Player Controls
+    if (!this.isBot && this.state !== 'punch' && this.state !== 'kick' && this.state !== 'hit') {
+      this.vx = 0;
+      let moving = false;
+      
+      if (keys['a']) { this.vx = -this.speed; moving = true; }
+      if (keys['d']) { this.vx = this.speed; moving = true; }
+      
+      if (keys['w'] && this.y === GROUND_Y) {
+        this.vy = this.jumpForce;
+        this.state = 'jump';
+      } else if (keys['l']) {
+        this.state = 'block';
+        this.vx = 0;
+      } else if (keys['j'] && this.state !== 'block') {
+        this.state = 'punch';
+        this.stateTimer = 20;
+      } else if (keys['k'] && this.state !== 'block') {
+        this.state = 'kick';
+        this.stateTimer = 30;
+      } else if (this.y === GROUND_Y) {
+        this.state = moving ? 'walk' : 'idle';
+      }
+    }
+    
+    // Bot AI
+    if (this.isBot && this.state !== 'punch' && this.state !== 'kick' && this.state !== 'hit') {
+      this.runAI(opp);
+    }
+    
+    // Update hitbox pos
+    this.attackBox.x = this.dir === 1 ? this.x + this.width : this.x - this.attackBox.w;
+    this.attackBox.y = this.state === 'kick' ? this.y - 40 : this.y - 70;
+  }
+  
+  runAI(opp) {
+    this.vx = 0;
+    const diffLevel = botLevelSelect.value;
+    const dist = Math.abs(opp.x - this.x);
+    
+    this.botTimer++;
+    let reactSpeed = diffLevel === 'hard' ? 10 : diffLevel === 'normal' ? 20 : 40;
+    
+    if (this.botTimer > reactSpeed) {
+      this.botTimer = 0;
+      const r = Math.random();
+      
+      if (dist > 80) {
+        // Move towards player
+        this.vx = this.dir * this.speed * (diffLevel === 'hard' ? 1 : 0.7);
+        this.state = 'walk';
+        
+        // Random jump
+        if (r < 0.1 && this.y === GROUND_Y) {
+          this.vy = this.jumpForce;
+          this.state = 'jump';
+        }
+      } else {
+        // Attack range
+        if (opp.state === 'punch' || opp.state === 'kick') {
+          // React to attack
+          if (r < (diffLevel === 'hard' ? 0.8 : diffLevel === 'normal' ? 0.5 : 0.2)) {
+            this.state = 'block';
+          } else {
+            this.state = r < 0.5 ? 'punch' : 'kick';
+            this.stateTimer = this.state === 'punch' ? 20 : 30;
+          }
+        } else {
+          // Attack
+          if (r < (diffLevel === 'easy' ? 0.3 : 0.6)) {
+            this.state = r < 0.5 ? 'punch' : 'kick';
+            this.stateTimer = this.state === 'punch' ? 20 : 30;
+          } else {
+            this.state = 'idle';
+          }
+        }
+      }
+    } else {
+      // keep moving if walking
+      if (this.state === 'walk') this.vx = this.dir * this.speed * (diffLevel === 'hard' ? 1 : 0.7);
+    }
+  }
+  
+  draw() {
+    ctx.fillStyle = this.color;
+    
+    // Draw body (simple stick/box)
+    ctx.fillRect(this.x, this.y - this.height, this.width, this.height);
+    
+    // Head
+    ctx.beginPath();
+    ctx.arc(this.x + this.width/2, this.y - this.height - 15, 20, 0, Math.PI*2);
+    ctx.fill();
+    
+    // Eye
+    ctx.fillStyle = '#111';
+    ctx.beginPath();
+    ctx.arc(this.x + this.width/2 + (this.dir * 10), this.y - this.height - 20, 4, 0, Math.PI*2);
+    ctx.fill();
+    
+    // State visual cues
+    ctx.fillStyle = this.color;
+    if (this.state === 'block') {
+      ctx.fillRect(this.dir === 1 ? this.x + this.width : this.x - 10, this.y - 90, 10, 60);
+    }
+    
+    // Attack box debug/visual
+    if (this.attackBox.active) {
+      ctx.fillStyle = this.state === 'punch' ? 'rgba(255,255,0,0.8)' : 'rgba(255,100,0,0.8)';
+      ctx.fillRect(this.attackBox.x, this.attackBox.y, this.attackBox.w, this.attackBox.h);
+    }
+    
+    if (this.state === 'hit') {
+      ctx.fillStyle = 'rgba(255,0,0,0.5)';
+      ctx.fillRect(this.x, this.y - this.height, this.width, this.height);
+    }
+  }
+  
+  takeDamage(amount) {
+    if (this.state === 'block') {
+      amount = Math.floor(amount / 4); // Block reduces damage
+      this.x -= this.dir * 10; // pushback
+    } else {
+      this.state = 'hit';
+      this.stateTimer = 15;
+      this.x -= this.dir * 20; // knockback
+    }
+    this.hp -= amount;
+    if (this.hp <= 0) {
+      this.hp = 0;
+      this.isDead = true;
+    }
+  }
+}
+
+let p1, p2;
+
+function checkCollisions() {
+  if (p1.attackBox.active && checkRectIntersect(p1.attackBox, {x:p2.x, y:p2.y-p2.height, w:p2.width, h:p2.height})) {
+    p2.takeDamage(p1.attackBox.damage);
+    p1.attackBox.active = false; // single hit
+    updateHealth();
+  }
+  if (p2.attackBox.active && checkRectIntersect(p2.attackBox, {x:p1.x, y:p1.y-p1.height, w:p1.width, h:p1.height})) {
+    p1.takeDamage(p2.attackBox.damage);
+    p2.attackBox.active = false;
+    updateHealth();
+  }
+}
+
+function checkRectIntersect(r1, r2) {
+  return !(r2.x > r1.x + r1.w || 
+           r2.x + r2.w < r1.x || 
+           r2.y > r1.y + r1.h ||
+           r2.y + r2.h < r1.y);
+}
+
+function updateHealth() {
+  p1HealthBar.style.width = p1.hp + '%';
+  p2HealthBar.style.width = p2.hp + '%';
+  
+  if (p1.isDead || p2.isDead) {
+    endGame(p1.isDead ? 'p2' : 'p1');
+  }
+}
+
+function drawFloor() {
+  ctx.fillStyle = '#2c3e50';
+  ctx.fillRect(0, GROUND_Y, 800, 450 - GROUND_Y);
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.moveTo(0, GROUND_Y); ctx.lineTo(800, GROUND_Y); ctx.stroke();
+}
+
+function updateTimer() {
+  if (gameState !== 'playing') return;
+  timer--;
+  timerEl.textContent = timer;
+  if (timer <= 0) {
+    // Time out
+    endGame(p1.hp > p2.hp ? 'p1' : p2.hp > p1.hp ? 'p2' : 'draw');
+  }
+}
+
+function startGame() {
+  p1 = new Fighter(150, '#3498db', false);
+  p2 = new Fighter(600, '#e74c3c', true);
+  timer = 60;
+  timerEl.textContent = timer;
+  updateHealth();
+  
+  gameState = 'playing';
+  overlay.style.display = 'none';
+  
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(updateTimer, 1000);
+  
+  requestAnimationFrame(loop);
+}
+
+function endGame(winner) {
+  gameState = 'gameover';
+  clearInterval(timerInterval);
+  overlay.style.display = 'flex';
+  
+  if (winner === 'p1') {
+    titleText.textContent = "YOU WIN!";
+    titleText.style.color = "#3498db";
+    subText.textContent = "คุณเอาชนะบอทได้สำเร็จ!";
+  } else if (winner === 'p2') {
+    titleText.textContent = "YOU LOSE!";
+    titleText.style.color = "#e74c3c";
+    subText.textContent = "บอทแข็งแกร่งเกินไป...";
+  } else {
+    titleText.textContent = "DRAW!";
+    titleText.style.color = "#f1c40f";
+    subText.textContent = "หมดเวลา พลังชีวิตเท่ากัน!";
+  }
+  
+  ctrlHint.style.display = 'none';
+  botLevelSelect.style.display = 'none';
+  startBtn.textContent = 'เล่นอีกครั้ง';
+  
+  // Score for DB: win = 100, lose = 10
+  const fScore = winner === 'p1' ? 100 : 10;
+  window.parent?.postMessage({ type: 'GAME_OVER', score: fScore }, '*');
+}
+
+function loop(timestamp) {
+  if (gameState !== 'playing') return;
+  
+  ctx.clearRect(0, 0, 800, 450);
+  drawFloor();
+  
+  p1.update(p2);
+  p2.update(p1);
+  checkCollisions();
+  
+  p1.draw();
+  p2.draw();
+  
+  requestAnimationFrame(loop);
+}
+
+startBtn.addEventListener('click', startGame);
+
+// Init draw
+drawFloor();
+</script>
+</body>
+</html>

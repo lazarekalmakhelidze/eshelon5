@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catch Apple</title>
+    <style>
+        body { margin: 0; padding: 0; background-color: #87CEEB; font-family: 'Arial', sans-serif; display: flex; flex-direction: column; align-items: center; height: 100vh; color: #333; overflow: hidden; }
+        h1 { margin-top: 20px; font-size: 2.5rem; text-shadow: 2px 2px 0 #fff; z-index: 5; }
+        .stats { font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; z-index: 5; background: rgba(255,255,255,0.7); padding: 5px 20px; border-radius: 20px; }
+        #gameArea { width: 100%; max-width: 500px; height: 600px; background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 100%); position: relative; border-radius: 10px; border: 4px solid #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.2); overflow: hidden; }
+        #basket { width: 80px; height: 60px; background: #8B4513; border-radius: 10px 10px 30px 30px; position: absolute; bottom: 20px; left: 210px; box-shadow: inset 0 -10px 10px rgba(0,0,0,0.3); display: flex; justify-content: center; align-items: flex-end; padding-bottom: 5px; font-size: 2rem; border-top: 5px solid #A0522D; }
+        .apple { width: 30px; height: 30px; background: #ef4444; border-radius: 50%; position: absolute; display: flex; justify-content: center; align-items: center; }
+        .apple::before { content: ''; width: 4px; height: 10px; background: #166534; position: absolute; top: -8px; border-radius: 2px; }
+        .apple::after { content: ''; width: 10px; height: 10px; background: #22c55e; position: absolute; top: -6px; right: 2px; border-radius: 50% 0 50% 0; }
+        
+        .game-over { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); flex-direction: column; align-items: center; justify-content: center; z-index: 10; backdrop-filter: blur(5px); color: white; }
+        .game-over h2 { font-size: 4rem; margin: 0; color: #ef4444; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .game-over p { font-size: 2rem; margin: 20px 0; }
+        .game-over button { padding: 15px 40px; font-size: 1.5rem; font-weight: bold; border-radius: 50px; border: none; background: #3b82f6; color: white; cursor: pointer; transition: transform 0.1s; }
+        .game-over button:active { transform: scale(0.95); }
+    </style>
+
+<style>/* global-responsive-fix */ canvas, #gameContainer { max-width: 100vw !important; max-height: 100vh !important; object-fit: contain !important; } body { overflow: hidden !important; touch-action: none; }</style>
+</head>
+<body>
+    <h1>รับผลไม้!</h1>
+    <div class="stats">คะแนน: <span id="score">0</span> | พลาด: <span id="misses">0</span>/3</div>
+    
+    <div id="gameArea">
+        <div id="basket">🛒</div>
+    </div>
+
+    <div class="game-over" id="gameOverModal">
+        <h2>เกมจบ!</h2>
+        <p>คุณรับผลไม้ได้ <span id="finalScore">0</span> ลูก</p>
+        <button onclick="startGame()">เล่นอีกครั้ง</button>
+    </div>
+
+    <script>
+        const gameArea = document.getElementById('gameArea');
+        const basket = document.getElementById('basket');
+        const scoreEl = document.getElementById('score');
+        const missesEl = document.getElementById('misses');
+        const gameOverModal = document.getElementById('gameOverModal');
+        const finalScoreEl = document.getElementById('finalScore');
+
+        let score = 0;
+        let misses = 0;
+        let isGameOver = false;
+        let basketX = 210;
+        let apples = [];
+        let gameLoopId;
+        let spawnIntervalId;
+        let speedMultiplier = 1;
+
+        // Move basket with mouse/touch
+        gameArea.addEventListener('mousemove', (e) => {
+            if (isGameOver) return;
+            const rect = gameArea.getBoundingClientRect();
+            let x = e.clientX - rect.left - 40; // 40 is half basket width
+            if (x < 0) x = 0;
+            if (x > gameArea.clientWidth - 80) x = gameArea.clientWidth - 80;
+            basketX = x;
+            basket.style.left = basketX + 'px';
+        });
+
+        gameArea.addEventListener('touchmove', (e) => {
+            if (isGameOver) return;
+            const rect = gameArea.getBoundingClientRect();
+            let x = e.touches[0].clientX - rect.left - 40;
+            if (x < 0) x = 0;
+            if (x > gameArea.clientWidth - 80) x = gameArea.clientWidth - 80;
+            basketX = x;
+            basket.style.left = basketX + 'px';
+            e.preventDefault();
+        }, { passive: false });
+
+        function spawnApple() {
+            if (isGameOver) return;
+            const apple = document.createElement('div');
+            apple.className = 'apple';
+            apple.x = Math.random() * (gameArea.clientWidth - 30);
+            apple.y = -30;
+            apple.style.left = apple.x + 'px';
+            apple.style.top = apple.y + 'px';
+            gameArea.appendChild(apple);
+            apples.push({ el: apple, x: apple.x, y: apple.y });
+            
+            // Speed increases over time
+            speedMultiplier += 0.02;
+            const nextSpawn = Math.max(400, 1500 - (score * 20));
+            spawnIntervalId = setTimeout(spawnApple, nextSpawn);
+        }
+
+        function update() {
+            if (isGameOver) return;
+            
+            for (let i = apples.length - 1; i >= 0; i--) {
+                const apple = apples[i];
+                apple.y += 3 * speedMultiplier;
+                apple.el.style.top = apple.y + 'px';
+                
+                // Collision with basket
+                if (apple.y > 520 && apple.y < 560) {
+                    if (apple.x + 30 > basketX && apple.x < basketX + 80) {
+                        score++;
+                        scoreEl.textContent = score;
+                        apple.el.remove();
+                        apples.splice(i, 1);
+                        continue;
+                    }
+                }
+                
+                // Missed
+                if (apple.y > 600) {
+                    misses++;
+                    missesEl.textContent = misses;
+                    apple.el.remove();
+                    apples.splice(i, 1);
+                    
+                    if (misses >= 3) {
+                        gameOver();
+                    }
+                }
+            }
+            
+            gameLoopId = requestAnimationFrame(update);
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            clearTimeout(spawnIntervalId);
+            cancelAnimationFrame(gameLoopId);
+            finalScoreEl.textContent = score;
+            gameOverModal.style.display = 'flex';
+            window.parent.postMessage({ type: 'GAME_OVER', score: score }, '*');
+        }
+
+        function startGame() {
+            score = 0;
+            misses = 0;
+            speedMultiplier = 1;
+            isGameOver = false;
+            scoreEl.textContent = score;
+            missesEl.textContent = misses;
+            gameOverModal.style.display = 'none';
+            
+            apples.forEach(a => a.el.remove());
+            apples = [];
+            
+            clearTimeout(spawnIntervalId);
+            cancelAnimationFrame(gameLoopId);
+            
+            spawnApple();
+            update();
+        }
+
+        // Start game
+        startGame();
+    </script>
+</body>
+</html>

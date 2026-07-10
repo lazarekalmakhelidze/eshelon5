@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deep Dungeon (Roguelike)</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #111; color: #eee; font-family: 'Courier New', Courier, monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+    #gameContainer { display: flex; flex-direction: column; align-items: center; }
+    #stats { width: 640px; display: flex; justify-content: space-between; padding: 10px; background: #222; border: 1px solid #444; font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
+    .stat-val { color: #f1c40f; }
+    .hp-val { color: #e74c3c; }
+    canvas { background: #000; border: 1px solid #444; box-shadow: 0 0 20px rgba(0,0,0,0.8); }
+    #logBox { width: 640px; height: 100px; background: #222; border: 1px solid #444; margin-top: 5px; padding: 10px; overflow-y: auto; font-size: 0.9rem; line-height: 1.4; color: #ccc; }
+    #overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; text-align: center; }
+    #overlay h1 { font-size: 4rem; color: #e74c3c; margin-bottom: 10px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    #overlay p { font-size: 1.2rem; margin-bottom: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    button { background: #e74c3c; color: #fff; border: none; padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 5px; cursor: pointer; transition: 0.2s; font-family: 'Segoe UI', sans-serif; }
+    button:hover { background: #c0392b; }
+    .keyboard-hint { margin-top: 20px; color: #888; font-family: 'Segoe UI', sans-serif; }
+    
+    #mobile-controls { display: none; width: 100%; justify-content: center; align-items: center; padding: 10px; margin-top: 5px; user-select: none; pointer-events: auto; }
+    .d-pad { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .d-pad-row { display: flex; gap: 5px; }
+    #mobile-controls button { width: 55px; height: 55px; border-radius: 10px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; font-weight: bold; font-size: 16px; touch-action: none; font-family: 'Courier New', Courier, monospace; padding: 0; margin: 0; }
+    #mobile-controls button:active { background: rgba(255,255,255,0.3) !important; transform: scale(0.95); }
+    @media (max-width: 640px) {
+      #gameContainer { width: 100vw; height: 100vh; justify-content: center; }
+      #stats, #logBox { width: 95vw; }
+      #gameCanvas { width: 95vw; height: auto; object-fit: contain; }
+      #mobile-controls { display: flex; }
+      .keyboard-hint { display: none; }
+    }
+  </style>
+
+<style>/* global-responsive-fix */ canvas, #gameContainer { max-width: 100vw !important; max-height: 100vh !important; object-fit: contain !important; } body { overflow: hidden !important; touch-action: none; }</style>
+</head>
+<body>
+
+<div id="gameContainer">
+  <div id="stats">
+    <div>Floor: <span id="floorVal" class="stat-val">1</span></div>
+    <div>HP: <span id="hpVal" class="hp-val">20</span>/<span id="maxHpVal" class="hp-val">20</span></div>
+    <div>ATK: <span id="atkVal" class="stat-val">5</span></div>
+    <div>Score: <span id="scoreVal" class="stat-val">0</span></div>
+  </div>
+  <canvas id="gameCanvas" width="640" height="480"></canvas>
+  <div id="logBox"></div>
+  
+  <div id="mobile-controls">
+    <div class="d-pad">
+      <button id="btn-w">W</button>
+      <div class="d-pad-row">
+        <button id="btn-a">A</button>
+        <button id="btn-s">S</button>
+        <button id="btn-d">D</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="overlay">
+  <h1 id="titleText">DEEP DUNGEON</h1>
+  <p id="subText">เกมผจญภัยแนว Roguelike แบบคลาสสิก (Turn-based)</p>
+  <button id="startBtn">เริ่มการสำรวจ</button>
+  <div class="keyboard-hint">
+    W, A, S, D หรือ ลูกศร เพื่อเดิน / โจมตีศัตรู<br>
+    เมื่อ HP หมด เกมจะจบลงทันที (Permadeath)
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const logBox = document.getElementById('logBox');
+const overlay = document.getElementById('overlay');
+const startBtn = document.getElementById('startBtn');
+
+const TILE_SIZE = 20;
+const COLS = canvas.width / TILE_SIZE; // 32
+const ROWS = canvas.height / TILE_SIZE; // 24
+
+const TILE_WALL = '#333';
+const TILE_FLOOR = '#1a1a1a';
+const COLOR_PLAYER = '#3498db';
+const COLOR_GOBLIN = '#2ecc71';
+const COLOR_ORC = '#e67e22';
+const COLOR_POTION = '#e74c3c';
+const COLOR_STAIRS = '#f1c40f';
+
+let map = [];
+let entities = [];
+let player;
+let floor = 1;
+let score = 0;
+let gameState = 'menu'; // menu, playing, gameover
+
+function log(msg, color = '#ccc') {
+  const p = document.createElement('div');
+  p.style.color = color;
+  p.textContent = msg;
+  logBox.prepend(p);
+  if (logBox.children.length > 20) logBox.lastChild.remove();
+}
+
+function updateHUD() {
+  document.getElementById('floorVal').textContent = floor;
+  document.getElementById('hpVal').textContent = player.hp;
+  document.getElementById('maxHpVal').textContent = player.maxHp;
+  document.getElementById('atkVal').textContent = player.atk;
+  document.getElementById('scoreVal').textContent = score;
+}
+
+class Entity {
+  constructor(x, y, char, color, name, isPlayer = false) {
+    this.x = x; this.y = y; this.char = char; this.color = color; this.name = name;
+    this.isPlayer = isPlayer; this.hp = 10; this.maxHp = 10; this.atk = 2; this.xp = 0;
+  }
+  draw() {
+    ctx.fillStyle = this.color;
+    ctx.font = 'bold 18px Courier New';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(this.char, this.x * TILE_SIZE + TILE_SIZE/2, this.y * TILE_SIZE + TILE_SIZE/2);
+  }
+}
+
+function generateMap() {
+  map = Array.from({ length: ROWS }, () => Array(COLS).fill(1)); // 1 = wall, 0 = floor
+  entities = [];
+  
+  const rooms = [];
+  const maxRooms = 10;
+  
+  for (let i = 0; i < maxRooms; i++) {
+    let w = Math.floor(Math.random() * 5) + 4;
+    let h = Math.floor(Math.random() * 5) + 4;
+    let x = Math.floor(Math.random() * (COLS - w - 1)) + 1;
+    let y = Math.floor(Math.random() * (ROWS - h - 1)) + 1;
+    
+    let overlap = false;
+    for (let r of rooms) {
+      if (x <= r.x + r.w && x + w >= r.x && y <= r.y + r.h && y + h >= r.y) {
+        overlap = true; break;
+      }
+    }
+    
+    if (!overlap) {
+      for (let ry = y; ry < y + h; ry++) {
+        for (let rx = x; rx < x + w; rx++) {
+          map[ry][rx] = 0;
+        }
+      }
+      rooms.push({x, y, w, h, cx: Math.floor(x + w/2), cy: Math.floor(y + h/2)});
+    }
+  }
+  
+  // Connect rooms with corridors
+  for (let i = 0; i < rooms.length - 1; i++) {
+    let r1 = rooms[i]; let r2 = rooms[i+1];
+    let x = r1.cx; let y = r1.cy;
+    while(x !== r2.cx) { map[y][x] = 0; x += Math.sign(r2.cx - x); }
+    while(y !== r2.cy) { map[y][x] = 0; y += Math.sign(r2.cy - y); }
+  }
+
+  // Place Player in room 0
+  if (!player) {
+    player = new Entity(rooms[0].cx, rooms[0].cy, '@', COLOR_PLAYER, 'คุณ', true);
+    player.hp = 20; player.maxHp = 20; player.atk = 5;
+  } else {
+    player.x = rooms[0].cx; player.y = rooms[0].cy;
+  }
+  entities.push(player);
+
+  // Place Stairs in last room
+  const lastRoom = rooms[rooms.length - 1];
+  let stairs = new Entity(lastRoom.cx, lastRoom.cy, '>', COLOR_STAIRS, 'Stairs');
+  stairs.isItem = true; stairs.type = 'stairs';
+  entities.push(stairs);
+
+  // Place Enemies and Items
+  for (let i = 1; i < rooms.length; i++) {
+    let r = rooms[i];
+    if (Math.random() < 0.6) { // Enemy
+      let type = Math.random() > 0.7 && floor > 2 ? 'O' : 'g';
+      let ex = r.x + Math.floor(Math.random() * (r.w - 2)) + 1;
+      let ey = r.y + Math.floor(Math.random() * (r.h - 2)) + 1;
+      
+      let enemy = new Entity(ex, ey, type, type === 'O' ? COLOR_ORC : COLOR_GOBLIN, type === 'O' ? 'ออร์ค' : 'ก็อบลิน');
+      enemy.hp = type === 'O' ? 15 + floor : 5 + floor;
+      enemy.atk = type === 'O' ? 4 + Math.floor(floor/2) : 2 + Math.floor(floor/3);
+      entities.push(enemy);
+    }
+    if (Math.random() < 0.3) { // Potion
+      let px = r.x + Math.floor(Math.random() * (r.w - 2)) + 1;
+      let py = r.y + Math.floor(Math.random() * (r.h - 2)) + 1;
+      let potion = new Entity(px, py, '♥', COLOR_POTION, 'ยาฟื้นพลัง');
+      potion.isItem = true; potion.type = 'heal';
+      entities.push(potion);
+    }
+  }
+  
+  log(`คุณลงมาถึงชั้นที่ ${floor}`, '#3498db');
+  updateHUD();
+}
+
+function drawMap() {
+  for (let y = 0; y < ROWS; y++) {
+    for (let x = 0; x < COLS; x++) {
+      ctx.fillStyle = map[y][x] === 1 ? TILE_WALL : TILE_FLOOR;
+      ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+      if (map[y][x] === 1) {
+        ctx.fillStyle = '#222';
+        ctx.fillRect(x * TILE_SIZE + 2, y * TILE_SIZE + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+      }
+    }
+  }
+}
+
+function getEntityAt(x, y) {
+  return entities.find(e => e.x === x && e.y === y && !e.isItem && e.hp > 0);
+}
+function getItemAt(x, y) {
+  return entities.find(e => e.x === x && e.y === y && e.isItem);
+}
+
+function processTurn() {
+  // Move enemies
+  for (let e of entities) {
+    if (e.isPlayer || e.isItem || e.hp <= 0) continue;
+    
+    let dist = Math.abs(e.x - player.x) + Math.abs(e.y - player.y);
+    if (dist < 6) { // Aggro range
+      let dx = Math.sign(player.x - e.x);
+      let dy = Math.sign(player.y - e.y);
+      
+      // Try horizontal
+      if (dx !== 0 && map[e.y][e.x + dx] === 0 && !getEntityAt(e.x + dx, e.y)) {
+        e.x += dx;
+      } else if (dy !== 0 && map[e.y + dy][e.x] === 0 && !getEntityAt(e.x, e.y + dy)) {
+        e.y += dy;
+      }
+      
+      // Attack player
+      if (Math.abs(e.x - player.x) + Math.abs(e.y - player.y) === 1) {
+        let dmg = Math.max(1, e.atk - Math.floor(Math.random() * 2));
+        player.hp -= dmg;
+        log(`${e.name} โจมตีคุณ โดนความเสียหาย ${dmg}!`, '#e74c3c');
+        if (player.hp <= 0) gameOver();
+      }
+    }
+  }
+  updateHUD();
+}
+
+function playerMove(dx, dy) {
+  if (gameState !== 'playing') return;
+  
+  let nx = player.x + dx;
+  let ny = player.y + dy;
+  
+  if (map[ny][nx] === 1) return; // Wall
+  
+  let target = getEntityAt(nx, ny);
+  if (target) {
+    // Attack
+    let dmg = Math.max(1, player.atk + Math.floor(Math.random() * 3) - 1);
+    target.hp -= dmg;
+    log(`คุณโจมตี ${target.name} โดนความเสียหาย ${dmg}`, '#f1c40f');
+    
+    if (target.hp <= 0) {
+      log(`${target.name} ถูกกำจัด! ได้รับ 10 คะแนน`, '#2ecc71');
+      score += 10;
+      target.char = '%'; // Corpse
+      target.color = '#555';
+      target.isItem = true; // Turn into corpse item (ignorable)
+    }
+  } else {
+    // Move
+    player.x = nx;
+    player.y = ny;
+    
+    let item = getItemAt(nx, ny);
+    if (item && item.type !== 'corpse') {
+      if (item.type === 'heal') {
+        player.hp = Math.min(player.maxHp, player.hp + 10);
+        log(`คุณดื่ม ยาฟื้นพลัง ฟื้นฟู HP`, '#2ecc71');
+        score += 5;
+        entities = entities.filter(e => e !== item);
+      } else if (item.type === 'stairs') {
+        floor++;
+        score += 50;
+        player.maxHp += 2;
+        player.hp += 5;
+        if(player.hp > player.maxHp) player.hp = player.maxHp;
+        player.atk += 1;
+        logBox.innerHTML = ''; // clear logs on floor change
+        generateMap();
+        return; // skip enemy turn on map gen
+      }
+    }
+  }
+  
+  processTurn();
+  drawAll();
+}
+
+function drawAll() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawMap();
+  for (let e of entities) {
+    if (e.isItem) e.draw();
+  }
+  for (let e of entities) {
+    if (!e.isItem && e.hp > 0 && !e.isPlayer) e.draw();
+  }
+  player.draw();
+}
+
+window.addEventListener('keydown', e => {
+  if (gameState !== 'playing') return;
+  if (['ArrowUp', 'w', 'W'].includes(e.key)) playerMove(0, -1);
+  if (['ArrowDown', 's', 'S'].includes(e.key)) playerMove(0, 1);
+  if (['ArrowLeft', 'a', 'A'].includes(e.key)) playerMove(-1, 0);
+  if (['ArrowRight', 'd', 'D'].includes(e.key)) playerMove(1, 0);
+});
+
+function gameOver() {
+  gameState = 'gameover';
+  overlay.style.display = 'flex';
+  document.getElementById('titleText').textContent = "YOU DIED";
+  document.getElementById('titleText').style.color = "#e74c3c";
+  document.getElementById('subText').innerHTML = `คุณพ่ายแพ้ในชั้นที่ ${floor}<br>คะแนนรวม: ${score}`;
+  document.querySelector('.keyboard-hint').style.display = 'none';
+  startBtn.textContent = 'เกิดใหม่ (New Game)';
+  
+  window.parent?.postMessage({ type: 'GAME_OVER', score: score }, '*');
+}
+
+const bindMove = (id, dx, dy) => {
+  const el = document.getElementById(id);
+  if(!el) return;
+  const handler = (e) => { e.preventDefault(); if(gameState==='playing') playerMove(dx, dy); };
+  el.addEventListener('touchstart', handler);
+  el.addEventListener('mousedown', handler);
+};
+bindMove('btn-w', 0, -1);
+bindMove('btn-a', -1, 0);
+bindMove('btn-s', 0, 1);
+bindMove('btn-d', 1, 0);
+
+function initGame() {
+  player = null;
+  floor = 1;
+  score = 0;
+  logBox.innerHTML = '';
+  document.querySelector('.keyboard-hint').style.display = 'block';
+  overlay.style.display = 'none';
+  gameState = 'playing';
+  generateMap();
+  drawAll();
+});
+</script>
+</body>
+</html>

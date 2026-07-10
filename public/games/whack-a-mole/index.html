@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whack-a-Mole</title>
+    <style>
+        body { margin: 0; padding: 0; background-color: #22c55e; font-family: 'Arial', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; color: white; }
+        h1 { font-size: 3rem; margin-bottom: 10px; text-shadow: 2px 2px 0 #166534; }
+        .stats { font-size: 1.5rem; font-weight: bold; margin-bottom: 20px; text-shadow: 1px 1px 0 #166534; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; background: #166534; padding: 20px; border-radius: 20px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+        .hole { width: 100px; height: 100px; background: #064e3b; border-radius: 50%; position: relative; overflow: hidden; box-shadow: inset 0 10px 10px rgba(0,0,0,0.5); border: 4px solid #14532d; }
+        .mole { width: 80px; height: 80px; background: #8b5a2b; border-radius: 40px 40px 0 0; position: absolute; bottom: -80px; left: 10px; transition: bottom 0.2s ease-in-out; cursor: pointer; display: flex; justify-content: center; align-items: flex-start; padding-top: 10px; font-size: 2rem; user-select: none; }
+        .mole.up { bottom: 0; }
+        .mole::before { content: '🐹'; }
+        
+        .game-over { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); flex-direction: column; align-items: center; justify-content: center; z-index: 10; backdrop-filter: blur(5px); }
+        .game-over h2 { font-size: 4rem; margin: 0; color: #facc15; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .game-over p { font-size: 2rem; margin: 20px 0; }
+        .game-over button { padding: 15px 40px; font-size: 1.5rem; font-weight: bold; border-radius: 50px; border: none; background: #3b82f6; color: white; cursor: pointer; transition: transform 0.1s; }
+        .game-over button:active { transform: scale(0.95); }
+    </style>
+
+<style>/* global-responsive-fix */ canvas, #gameContainer { max-width: 100vw !important; max-height: 100vh !important; object-fit: contain !important; } body { overflow: hidden !important; touch-action: none; }</style>
+</head>
+<body>
+    <h1>ทุบตัวตุ่น!</h1>
+    <div class="stats">คะแนน: <span id="score">0</span> | เวลา: <span id="time">30</span> วิ</div>
+    
+    <div class="grid">
+        <div class="hole"><div class="mole" id="mole-0"></div></div>
+        <div class="hole"><div class="mole" id="mole-1"></div></div>
+        <div class="hole"><div class="mole" id="mole-2"></div></div>
+        <div class="hole"><div class="mole" id="mole-3"></div></div>
+        <div class="hole"><div class="mole" id="mole-4"></div></div>
+        <div class="hole"><div class="mole" id="mole-5"></div></div>
+        <div class="hole"><div class="mole" id="mole-6"></div></div>
+        <div class="hole"><div class="mole" id="mole-7"></div></div>
+        <div class="hole"><div class="mole" id="mole-8"></div></div>
+    </div>
+
+    <div class="game-over" id="gameOverModal">
+        <h2>หมดเวลา!</h2>
+        <p>คุณทุบไปได้ <span id="finalScore">0</span> ตัว</p>
+        <button onclick="startGame()">เล่นอีกครั้ง</button>
+    </div>
+
+    <script>
+        let score = 0;
+        let time = 30;
+        let isGameOver = false;
+        let moleInterval;
+        let gameTimer;
+        let activeMole = null;
+        
+        const scoreEl = document.getElementById('score');
+        const timeEl = document.getElementById('time');
+        const moles = document.querySelectorAll('.mole');
+        const gameOverModal = document.getElementById('gameOverModal');
+        const finalScoreEl = document.getElementById('finalScore');
+
+        function randomHole() {
+            return Math.floor(Math.random() * 9);
+        }
+
+        function showMole() {
+            if (isGameOver) return;
+            if (activeMole !== null) {
+                moles[activeMole].classList.remove('up');
+            }
+            activeMole = randomHole();
+            moles[activeMole].classList.add('up');
+            
+            const timeToWait = Math.random() * 800 + 400; // 400ms - 1200ms
+            moleInterval = setTimeout(showMole, timeToWait);
+        }
+
+        moles.forEach((mole, index) => {
+            mole.addEventListener('mousedown', () => {
+                if (!isGameOver && index === activeMole && mole.classList.contains('up')) {
+                    score++;
+                    scoreEl.textContent = score;
+                    mole.classList.remove('up');
+                    activeMole = null;
+                }
+            });
+        });
+
+        function updateTime() {
+            time--;
+            timeEl.textContent = time;
+            if (time <= 0) {
+                gameOver();
+            }
+        }
+
+        function gameOver() {
+            isGameOver = true;
+            clearTimeout(moleInterval);
+            clearInterval(gameTimer);
+            if (activeMole !== null) {
+                moles[activeMole].classList.remove('up');
+            }
+            finalScoreEl.textContent = score;
+            gameOverModal.style.display = 'flex';
+            window.parent.postMessage({ type: 'GAME_OVER', score: score }, '*');
+        }
+
+        function startGame() {
+            score = 0;
+            time = 30;
+            isGameOver = false;
+            scoreEl.textContent = score;
+            timeEl.textContent = time;
+            gameOverModal.style.display = 'none';
+            if (activeMole !== null) {
+                moles[activeMole].classList.remove('up');
+            }
+            clearTimeout(moleInterval);
+            clearInterval(gameTimer);
+            
+            gameTimer = setInterval(updateTime, 1000);
+            showMole();
+        }
+
+        // Start game on load
+        startGame();
+    </script>
+</body>
+</html>

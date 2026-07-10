@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Speed</title>
+    <style>
+        body { margin: 0; padding: 0; background-color: #fce7f3; font-family: 'Arial', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; color: #831843; }
+        h1 { margin-bottom: 20px; font-size: 3rem; text-shadow: 2px 2px 0px #fbcfe8; }
+        .stats { font-size: 1.5rem; font-weight: bold; margin-bottom: 30px; display: flex; gap: 40px; }
+        .word-display { font-size: 5rem; font-weight: black; letter-spacing: 5px; margin-bottom: 30px; color: #db2777; transition: color 0.2s; }
+        .input-area { width: 80%; max-width: 500px; text-align: center; }
+        input { width: 100%; padding: 20px; font-size: 2rem; border-radius: 20px; border: 4px solid #f9a8d4; outline: none; text-align: center; color: #9d174d; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        input:focus { border-color: #db2777; }
+        
+        .game-over { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); flex-direction: column; align-items: center; justify-content: center; z-index: 10; color: white; backdrop-filter: blur(5px); }
+        .game-over h2 { font-size: 4rem; margin: 0; color: #f472b6; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .game-over p { font-size: 2rem; margin: 20px 0; }
+        .game-over button { padding: 15px 40px; font-size: 1.5rem; font-weight: bold; border-radius: 50px; border: none; background: #db2777; color: white; cursor: pointer; transition: transform 0.1s; }
+        .game-over button:active { transform: scale(0.95); }
+    </style>
+
+<style>/* global-responsive-fix */ canvas, #gameContainer { max-width: 100vw !important; max-height: 100vh !important; object-fit: contain !important; } body { overflow: hidden !important; touch-action: none; }</style>
+</head>
+<body>
+    <h1>พิมพ์ดีดพิชิตคำ</h1>
+    <div class="stats">
+        <div>เวลา: <span id="time">60</span> วิ</div>
+        <div>คะแนน: <span id="score">0</span></div>
+    </div>
+    
+    <div class="word-display" id="wordDisplay">READY</div>
+    <div class="input-area">
+        <input type="text" id="wordInput" placeholder="พิมพ์คำที่เห็นตรงนี้..." autocomplete="off">
+    </div>
+
+    <div class="game-over" id="gameOverModal">
+        <h2>หมดเวลา!</h2>
+        <p>คุณพิมพ์ได้ <span id="finalScore">0</span> คะแนน</p>
+        <button onclick="startGame()">เล่นอีกครั้ง</button>
+    </div>
+
+    <script>
+        const words = [
+            "apple", "banana", "cherry", "date", "elderberry", "fig", "grape", "honeydew", 
+            "kiwi", "lemon", "mango", "nectarine", "orange", "papaya", "quince", "raspberry",
+            "strawberry", "tangerine", "watermelon", "computer", "keyboard", "mouse", "monitor",
+            "internet", "software", "hardware", "developer", "coding", "javascript", "react",
+            "ocean", "mountain", "river", "forest", "desert", "island", "planet", "galaxy",
+            "student", "teacher", "school", "university", "book", "pencil", "library", "exam"
+        ];
+
+        const wordDisplay = document.getElementById('wordDisplay');
+        const wordInput = document.getElementById('wordInput');
+        const scoreEl = document.getElementById('score');
+        const timeEl = document.getElementById('time');
+        const gameOverModal = document.getElementById('gameOverModal');
+        const finalScoreEl = document.getElementById('finalScore');
+
+        let score = 0;
+        let time = 60;
+        let isPlaying = false;
+        let currentWord = "";
+        let timeInterval;
+
+        function pickRandomWord() {
+            const randomIndex = Math.floor(Math.random() * words.length);
+            currentWord = words[randomIndex];
+            wordDisplay.textContent = currentWord;
+        }
+
+        wordInput.addEventListener('input', () => {
+            if (!isPlaying && wordInput.value.length > 0) {
+                startGamePlay();
+            }
+
+            if (isPlaying && wordInput.value === currentWord) {
+                score += currentWord.length * 10;
+                scoreEl.textContent = score;
+                wordInput.value = '';
+                wordDisplay.style.color = '#10b981'; // Green flash
+                setTimeout(() => wordDisplay.style.color = '#db2777', 150);
+                pickRandomWord();
+            }
+        });
+
+        function startGamePlay() {
+            isPlaying = true;
+            pickRandomWord();
+            timeInterval = setInterval(updateTime, 1000);
+        }
+
+        function updateTime() {
+            time--;
+            timeEl.textContent = time;
+            if (time === 0) {
+                gameOver();
+            }
+        }
+
+        function gameOver() {
+            isPlaying = false;
+            clearInterval(timeInterval);
+            wordInput.disabled = true;
+            finalScoreEl.textContent = score;
+            gameOverModal.style.display = 'flex';
+            window.parent.postMessage({ type: 'GAME_OVER', score: score }, '*');
+        }
+
+        function startGame() {
+            score = 0;
+            time = 60;
+            isPlaying = false;
+            scoreEl.textContent = score;
+            timeEl.textContent = time;
+            wordInput.disabled = false;
+            wordInput.value = '';
+            wordDisplay.textContent = "READY";
+            gameOverModal.style.display = 'none';
+            wordInput.focus();
+        }
+
+        // Init
+        wordInput.focus();
+    </script>
+</body>
+</html>

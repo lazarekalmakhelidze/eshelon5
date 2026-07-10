@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slime Hunter (Mini RPG)</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #2c3e50; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+    #gameContainer { position: relative; width: 800px; height: 600px; background: #7bc04b; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); overflow: hidden; cursor: crosshair; }
+    canvas { display: block; width: 100%; height: 100%; }
+    .hud { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; align-items: flex-start; z-index: 10; pointer-events: none; text-shadow: 1px 1px 2px #000; }
+    .hud-box { background: rgba(0,0,0,0.4); padding: 10px 15px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.2); }
+    .stat { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
+    
+    .bar-bg { width: 150px; height: 15px; background: #333; border-radius: 10px; border: 2px solid #000; overflow: hidden; margin-top: 5px; }
+    .bar { height: 100%; transition: width 0.1s; }
+    #hp-bar { background: #e74c3c; width: 100%; }
+    #xp-bar { background: #f1c40f; width: 0%; }
+    
+    #overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; }
+    #overlay h1 { font-size: 4rem; color: #f1c40f; margin-bottom: 10px; text-shadow: 0 0 15px rgba(241,196,15,0.6); }
+    #overlay p { font-size: 1.2rem; color: #ccc; margin-bottom: 25px; text-align: center; }
+    .controls { background: rgba(255,255,255,0.1); padding: 15px 25px; border-radius: 10px; margin-bottom: 25px; text-align: center; }
+    button { background: #2ecc71; color: #fff; border: none; padding: 15px 50px; font-size: 1.5rem; font-weight: bold; border-radius: 50px; cursor: pointer; transition: 0.2s; box-shadow: 0 5px 15px rgba(46,204,113,0.4); }
+    button:hover { transform: scale(1.05); background: #27ae60; }
+    
+    #mobile-controls { display: none; position: absolute; bottom: 20px; left: 0; right: 0; padding: 0 20px; justify-content: space-between; align-items: flex-end; z-index: 15; user-select: none; pointer-events: auto; }
+    .d-pad, .action-pad { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .d-pad-row { display: flex; gap: 5px; }
+    #mobile-controls button { width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.5); color: white; font-weight: bold; font-size: 14px; touch-action: none; box-shadow: 0 4px 6px rgba(0,0,0,0.3); padding: 0; margin: 0; }
+    #mobile-controls button:active { background: rgba(255,255,255,0.6) !important; transform: scale(0.9); }
+    @media (max-width: 800px) {
+      #gameContainer { width: 100vw; height: 100vh; border-radius: 0; }
+      #gameCanvas { object-fit: contain; width: 100%; height: 100%; }
+      #mobile-controls { display: flex; }
+      .controls { display: none; }
+    }
+  </style>
+
+<style>/* global-responsive-fix */ canvas, #gameContainer { max-width: 100vw !important; max-height: 100vh !important; object-fit: contain !important; } body { overflow: hidden !important; touch-action: none; }</style>
+</head>
+<body>
+
+<div id="gameContainer">
+  <div class="hud">
+    <div class="hud-box">
+      <div class="stat">LVL: <span id="lvl-val">1</span></div>
+      <div>HP: <span id="hp-val">100</span>/100</div>
+      <div class="bar-bg"><div class="bar" id="hp-bar"></div></div>
+      <div style="margin-top: 10px; font-size: 0.9rem">XP</div>
+      <div class="bar-bg"><div class="bar" id="xp-bar"></div></div>
+    </div>
+    <div class="hud-box">
+      <div class="stat" style="color: #f1c40f; font-size: 1.5rem">Score: <span id="score-val">0</span></div>
+    </div>
+  </div>
+  
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+  
+  <div id="mobile-controls">
+    <div class="d-pad">
+      <button id="btn-w">W</button>
+      <div class="d-pad-row">
+        <button id="btn-a">A</button>
+        <button id="btn-s">S</button>
+        <button id="btn-d">D</button>
+      </div>
+    </div>
+    <div class="action-pad">
+      <button id="btn-atk" style="background: rgba(231,76,60,0.5); width: 70px; height: 70px;">⚔️</button>
+    </div>
+  </div>
+  
+  <div id="overlay">
+    <h1 id="titleText">SLIME HUNTER</h1>
+    <p id="subText">เอาชีวิตรอดจากกองทัพสไลม์ และเก็บเลเวลให้ได้มากที่สุด!</p>
+    <div class="controls" id="ctrlHint">
+      W, A, S, D - เดิน<br>
+      คลิกเมาส์ หรือ Spacebar - โจมตี (ฟันดาบ)
+    </div>
+    <button id="startBtn">เริ่มผจญภัย</button>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const overlay = document.getElementById('overlay');
+const startBtn = document.getElementById('startBtn');
+const titleText = document.getElementById('titleText');
+const subText = document.getElementById('subText');
+const ctrlHint = document.getElementById('ctrlHint');
+
+const hpBar = document.getElementById('hp-bar');
+const xpBar = document.getElementById('xp-bar');
+const hpVal = document.getElementById('hp-val');
+const lvlVal = document.getElementById('lvl-val');
+const scoreVal = document.getElementById('score-val');
+
+const W = canvas.width;
+const H = canvas.height;
+
+let gameState = 'menu'; // menu, playing, gameover
+let score = 0;
+let enemies = [];
+let particles = [];
+let floatTexts = [];
+let spawnRate = 100;
+let frameCount = 0;
+
+const keys = {};
+window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+window.addEventListener('mousedown', (e) => {
+  if (e.target.tagName !== 'BUTTON') player.attack();
+});
+
+const bindTouch = (id, key) => {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('touchstart', (e) => { e.preventDefault(); keys[key] = true; });
+  el.addEventListener('touchend', (e) => { e.preventDefault(); keys[key] = false; });
+  el.addEventListener('mousedown', (e) => { e.preventDefault(); keys[key] = true; });
+  el.addEventListener('mouseup', (e) => { e.preventDefault(); keys[key] = false; });
+  el.addEventListener('mouseleave', (e) => { e.preventDefault(); keys[key] = false; });
+};
+bindTouch('btn-w', 'w');
+bindTouch('btn-a', 'a');
+bindTouch('btn-s', 's');
+bindTouch('btn-d', 'd');
+document.getElementById('btn-atk')?.addEventListener('touchstart', (e) => { e.preventDefault(); player.attack(); });
+document.getElementById('btn-atk')?.addEventListener('mousedown', (e) => { e.preventDefault(); player.attack(); });
+
+class Player {
+  constructor() {
+    this.x = W / 2;
+    this.y = H / 2;
+    this.radius = 20;
+    this.speed = 4;
+    
+    this.maxHp = 100;
+    this.hp = 100;
+    this.level = 1;
+    this.xp = 0;
+    this.xpReq = 50;
+    
+    this.attackRange = 60;
+    this.attackPower = 25;
+    this.attackTimer = 0;
+    this.attackCooldown = 15;
+    this.facing = 0; // angle in radians
+  }
+  
+  update() {
+    if (this.hp <= 0) {
+      endGame();
+      return;
+    }
+    
+    let dx = 0, dy = 0;
+    if (keys['w']) dy -= 1;
+    if (keys['s']) dy += 1;
+    if (keys['a']) dx -= 1;
+    if (keys['d']) dx += 1;
+    
+    if (dx !== 0 || dy !== 0) {
+      const len = Math.hypot(dx, dy);
+      this.x += (dx / len) * this.speed;
+      this.y += (dy / len) * this.speed;
+      this.facing = Math.atan2(dy, dx);
+    }
+    
+    // Bounds
+    this.x = Math.max(this.radius, Math.min(W - this.radius, this.x));
+    this.y = Math.max(this.radius, Math.min(H - this.radius, this.y));
+    
+    if (this.attackTimer > 0) this.attackTimer--;
+    
+    if (keys[' '] && this.attackTimer <= 0) {
+      this.attack();
+    }
+  }
+  
+  attack() {
+    if (this.attackTimer > 0 || gameState !== 'playing') return;
+    this.attackTimer = this.attackCooldown;
+    
+    // Check hit
+    for (let i = enemies.length - 1; i >= 0; i--) {
+      let e = enemies[i];
+      let dist = Math.hypot(e.x - this.x, e.y - this.y);
+      if (dist < this.attackRange + e.radius) {
+        // Angle check (simple arc in front)
+        let angleToEnemy = Math.atan2(e.y - this.y, e.x - this.x);
+        let angleDiff = Math.abs(angleToEnemy - this.facing);
+        if (angleDiff > Math.PI) angleDiff = Math.PI * 2 - angleDiff;
+        
+        if (angleDiff < Math.PI / 2 || dist < this.radius + e.radius + 10) {
+          e.hp -= this.attackPower;
+          e.x += Math.cos(angleToEnemy) * 20; // knockback
+          e.y += Math.sin(angleToEnemy) * 20;
+          createParticles(e.x, e.y, e.color, 5);
+          floatTexts.push({ x: e.x, y: e.y, text: this.attackPower, alpha: 1 });
+          
+          if (e.hp <= 0) {
+            this.gainXp(e.xpVal);
+            score += e.scoreVal;
+            scoreVal.textContent = score;
+            createParticles(e.x, e.y, e.color, 15);
+            enemies.splice(i, 1);
+          }
+        }
+      }
+    }
+  }
+  
+  gainXp(amount) {
+    this.xp += amount;
+    if (this.xp >= this.xpReq) {
+      this.levelUp();
+    }
+    updateHUD();
+  }
+  
+  levelUp() {
+    this.xp -= this.xpReq;
+    this.level++;
+    this.xpReq = Math.floor(this.xpReq * 1.5);
+    this.maxHp += 20;
+    this.hp = this.maxHp;
+    this.attackPower += 5;
+    floatTexts.push({ x: this.x, y: this.y - 40, text: "LEVEL UP!", color: '#f1c40f', alpha: 1 });
+  }
+  
+  draw() {
+    // Attack Arc visual
+    if (this.attackTimer > this.attackCooldown - 5) {
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.beginPath();
+      ctx.moveTo(this.x, this.y);
+      ctx.arc(this.x, this.y, this.attackRange, this.facing - Math.PI/3, this.facing + Math.PI/3);
+      ctx.fill();
+    }
+    
+    // Player body
+    ctx.fillStyle = '#3498db';
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = '#2980b9';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    
+    // Sword/Direction Indicator
+    ctx.strokeStyle = '#bdc3c7';
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.moveTo(this.x, this.y);
+    ctx.lineTo(this.x + Math.cos(this.facing) * 35, this.y + Math.sin(this.facing) * 35);
+    ctx.stroke();
+  }
+}
+
+class Enemy {
+  constructor() {
+    // spawn outside screen
+    let side = Math.floor(Math.random() * 4);
+    if (side === 0) { this.x = Math.random() * W; this.y = -30; }
+    else if (side === 1) { this.x = W + 30; this.y = Math.random() * H; }
+    else if (side === 2) { this.x = Math.random() * W; this.y = H + 30; }
+    else { this.x = -30; this.y = Math.random() * H; }
+    
+    // Type scaling with player level
+    let rand = Math.random();
+    if (player.level > 3 && rand > 0.7) {
+      this.type = 'big'; this.radius = 25; this.hp = 100; this.speed = 1.5; this.color = '#e67e22'; this.damage = 15; this.xpVal = 25; this.scoreVal = 50;
+    } else if (player.level > 5 && rand > 0.9) {
+      this.type = 'fast'; this.radius = 12; this.hp = 20; this.speed = 3.5; this.color = '#9b59b6'; this.damage = 5; this.xpVal = 15; this.scoreVal = 30;
+    } else {
+      this.type = 'normal'; this.radius = 16; this.hp = 40; this.speed = 2; this.color = '#2ecc71'; this.damage = 10; this.xpVal = 10; this.scoreVal = 10;
+    }
+  }
+  
+  update() {
+    let dx = player.x - this.x;
+    let dy = player.y - this.y;
+    let len = Math.hypot(dx, dy);
+    
+    if (len < player.radius + this.radius) {
+      // Hit player
+      player.hp -= this.damage;
+      this.x -= dx/len * 30; // bounce back
+      this.y -= dy/len * 30;
+      updateHUD();
+      createParticles(player.x, player.y, '#e74c3c', 5);
+    } else {
+      this.x += (dx / len) * this.speed;
+      this.y += (dy / len) * this.speed;
+    }
+  }
+  
+  draw() {
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    // Slime shape (bottom flat, top round)
+    ctx.arc(this.x, this.y, this.radius, Math.PI, 0);
+    ctx.lineTo(this.x + this.radius, this.y + this.radius/2);
+    ctx.lineTo(this.x - this.radius, this.y + this.radius/2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    // Eyes
+    ctx.fillStyle = '#000';
+    ctx.beginPath(); ctx.arc(this.x - 5, this.y - 2, 2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(this.x + 5, this.y - 2, 2, 0, Math.PI*2); ctx.fill();
+  }
+}
+
+let player;
+
+function createParticles(x, y, color, count) {
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: x, y: y,
+      vx: (Math.random() - 0.5) * 8, vy: (Math.random() - 0.5) * 8,
+      life: 1, color: color
+    });
+  }
+}
+
+function updateHUD() {
+  hpVal.textContent = player.hp;
+  lvlVal.textContent = player.level;
+  hpBar.style.width = Math.max(0, (player.hp / player.maxHp) * 100) + '%';
+  xpBar.style.width = (player.xp / player.xpReq) * 100 + '%';
+}
+
+function startGame() {
+  player = new Player();
+  enemies = [];
+  particles = [];
+  floatTexts = [];
+  score = 0;
+  frameCount = 0;
+  spawnRate = 100;
+  
+  updateHUD();
+  scoreVal.textContent = score;
+  
+  gameState = 'playing';
+  overlay.style.display = 'none';
+  requestAnimationFrame(loop);
+}
+
+function endGame() {
+  gameState = 'gameover';
+  overlay.style.display = 'flex';
+  titleText.textContent = "GAME OVER";
+  titleText.style.color = "#e74c3c";
+  subText.textContent = `คุณไปถึงเลเวล ${player.level} สกอร์รวม: ${score}`;
+  ctrlHint.style.display = 'none';
+  startBtn.textContent = 'เล่นอีกครั้ง';
+  
+  window.parent?.postMessage({ type: 'GAME_OVER', score: score }, '*');
+}
+
+function loop() {
+  if (gameState !== 'playing') return;
+  
+  // Clear & Draw BG grass pattern
+  ctx.fillStyle = '#7bc04b';
+  ctx.fillRect(0, 0, W, H);
+  
+  frameCount++;
+  if (frameCount % spawnRate === 0) {
+    enemies.push(new Enemy());
+    // Increase difficulty slowly
+    if (spawnRate > 20) spawnRate--;
+  }
+  
+  player.update();
+  
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    enemies[i].update();
+    enemies[i].draw();
+  }
+  
+  player.draw();
+  
+  // Particles
+  for (let i = particles.length - 1; i >= 0; i--) {
+    let p = particles[i];
+    p.x += p.vx; p.y += p.vy;
+    p.life -= 0.05;
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = p.life;
+    ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI*2); ctx.fill();
+    ctx.globalAlpha = 1;
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+  
+  // Floating texts
+  for (let i = floatTexts.length - 1; i >= 0; i--) {
+    let t = floatTexts[i];
+    t.y -= 1;
+    t.alpha -= 0.02;
+    ctx.fillStyle = t.color || '#fff';
+    ctx.globalAlpha = Math.max(0, t.alpha);
+    ctx.font = 'bold 20px sans-serif';
+    ctx.fillText(t.text, t.x - 10, t.y);
+    ctx.globalAlpha = 1;
+    if (t.alpha <= 0) floatTexts.splice(i, 1);
+  }
+  
+  requestAnimationFrame(loop);
+}
+
+// Initial draw
+ctx.fillStyle = '#7bc04b';
+ctx.fillRect(0, 0, W, H);
+</script>
+</body>
+</html>
